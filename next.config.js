@@ -14,7 +14,9 @@ const nextConfig = {
     domains: [
       'images.unsplash.com',
       'localhost',
-      'res.cloudinary.com'
+      'res.cloudinary.com',
+      'fonts.googleapis.com',
+      'fonts.gstatic.com'
     ],
   },
   i18n: {
