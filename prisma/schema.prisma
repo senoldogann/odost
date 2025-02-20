@@ -1,0 +1,214 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Ravintola ja Baari yhteinen käyttäjämalli
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("USER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  reservations  Reservation[]
+  giftCards     GiftCard[]
+}
+
+enum Role {
+  USER
+  ADMIN
+  STAFF
+}
+
+// Ruoka- ja juomalistat
+model MenuItem {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  price       Float     // Hinta euroina
+  category    String
+  image       String?
+  allergens   String[]
+  type        MenuType
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean   @default(false)
+  order       Int       @default(0)  // Sıralama için
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum MenuType {
+  RAVINTOLA
+  BAARI
+}
+
+// Pöytävaraukset
+model Reservation {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  date        DateTime
+  time        String
+  guests      Int
+  type        ReservationType
+  status      ReservationStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum ReservationType {
+  RAVINTOLA
+  BAARI
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// Lahjakortit
+model GiftCard {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  amount      Float     // Arvo euroina
+  balance     Float     // Saldo euroina
+  isActive    Boolean   @default(true)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Yhteydenottolomakkeet
+model ContactForm {
+  id          String    @id @default(cuid())
+  name        String
+  email       String
+  subject     String
+  message     String
+  type        ContactType
+  status      ContactStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum ContactType {
+  RAVINTOLA
+  BAARI
+  YLEINEN
+}
+
+enum ContactStatus {
+  PENDING
+  RESOLVED
+  ARCHIVED
+}
+
+// Galleria
+model Gallery {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  type        GalleryType
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum GalleryType {
+  RAVINTOLA
+  BAARI
+}
+
+// Footer ayarları
+model Footer {
+  id           String   @id @default(cuid())
+  address      String
+  phone        String
+  email        String
+  openingHours Json
+  socialMedia  Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Atmosfer etkinlikleri
+model AtmosphereEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  schedule    String
+  type        MenuType  // RAVINTOLA veya BAARI
+  isActive    Boolean   @default(true)
+  order       Int       @default(0)
+  imageUrl    String?   // Yeni eklenen alan
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Header Menü modeli
+model HeaderMenu {
+  id          String    @id @default(cuid())
+  title       String
+  path        String
+  order       Int       @default(0)
+  parentId    String?
+  parent      HeaderMenu?  @relation("MenuItems", fields: [parentId], references: [id])
+  children    HeaderMenu[] @relation("MenuItems")
+  isActive    Boolean   @default(true)
+  type        MenuType  // RAVINTOLA veya BAARI
+  siteTitle   String?   // Site başlığı
+  siteLogo    String?   // Site logosu
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model HeroSection {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  type      MenuType // RAVINTOLA, BAARI
+  isActive  Boolean  @default(true)
+  buttonText String? // Buton metni
+  buttonUrl  String? // Buton URL'i
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  type               String    @id @unique
+  isActive           Boolean   @default(true)
+  maintenanceMode    Boolean   @default(false)
+  maintenanceMessage String?   @db.Text
+  title              String
+  description        String    @db.Text
+  keywords           String[]
+  ogTitle           String?
+  ogDescription     String?    @db.Text
+  ogImage           String?
+  twitterCard       String?
+  twitterTitle      String?
+  twitterDescription String?   @db.Text
+  twitterImage      String?
+  googleAnalyticsId String?
+  facebookPixelId   String?
+  robotsTxt         String?    @db.Text
+  sitemapXml        String?    @db.Text
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("site_settings")
+} 

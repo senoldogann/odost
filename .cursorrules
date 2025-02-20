@@ -1,0 +1,133 @@
+# CursorAI Kural Dosyası (.cursorrules)
+
+# 1. Dosya ve Klasör Yapısını Koruma
+structure:
+  prevent_duplicate_files: true  # Aynı isimde dosya farklı klasörlerde oluşturulamaz.
+  enforce_directory_structure: true  # Belirtilen dizin yapısına bağlı kal.
+  allowed_directories:
+    - src
+    - components
+    - utils
+    - public
+    - tests
+    - backend
+    - frontend
+    - config
+  forbidden_directories:
+    - node_modules
+    - .cache
+    - .vscode
+    - .idea
+
+# 2. Dosya Düzenleme Kuralları
+editing:
+  prevent_unrelated_modifications: true  # Düzenleme sırasında gereksiz kod değişikliklerini engelle.
+  restrict_auto_deletion: true  # Mevcut kod bloklarını rastgele silme.
+  allow_comment_updates_only: false  # Yalnızca yorumları güncelleyebilir mi?
+  validate_code_syntax: true  # Yapılan değişikliklerin sentaks doğruluğunu kontrol et.
+  enforce_code_formatting: true  # Kodun formatının bozulmasını engelle.
+  follow_project_conventions: true  # Proje kodlama standartlarına uy.
+  ask_user_preference: true  # Kullanıcıdan tercihlerini sor.
+  default_to_latest_technologies: true  # Kullanıcı özellikle belirtmezse en güncel teknolojileri kullan.
+
+# 3. Otomatik Dosya Oluşturma Kuralları
+auto_creation:
+  allow_auto_creation: true  # Yapay zeka otomatik dosya oluşturabilir mi?
+  restricted_file_types:
+    - .log
+    - .tmp
+    - .backup
+  required_confirmation_for_new_files: true  # Yeni bir dosya oluştururken onay iste.
+  generate_missing_files: true  # Eksik dosyaları otomatik tamamla (örn: env, config, README).
+
+# 4. Güvenlik Kuralları
+security:
+  enforce_security_scans: true  # Güvenlik açıklarını tarayıp uyarı ver.
+  cors_policy: strict  # Varsayılan olarak güvenli CORS politikaları uygula.
+  encrypt_sensitive_data: true  # Hassas verileri şifreleyerek sakla.
+  enable_rate_limiting: true  # API'lerde DDoS saldırılarını önlemek için rate limiting uygula.
+
+# 5. API ve Backend Performansı
+backend_performance:
+  enable_caching: true  # API yanıtlarını önbelleğe alarak hızlandır.
+  enforce_lazy_loading: true  # Gereksiz büyük veri yüklemelerini engelle.
+  use_task_queues: true  # Yoğun işlemler için asenkron kuyruk kullan.
+  select_best_api_architecture: true  # GraphQL veya REST arasında ihtiyaca göre seçim yap.
+
+# 6. Frontend Verimliliği
+frontend_performance:
+  optimize_images: true  # Görselleri otomatik olarak optimize et.
+  enable_code_splitting: true  # Kod bölme tekniklerini uygula.
+  follow_a11y_standards: true  # WCAG erişilebilirlik standartlarına uy.
+  prefer_server_side_rendering: true  # Mümkün olduğunda SSR kullan.
+
+# 7. CI/CD ve Deploy Kuralları
+deployment:
+  require_tests_before_merge: true  # Merge öncesinde testlerin çalıştırılmasını zorunlu kıl.
+  enforce_lint_checks: true  # Kod stil denetimlerini zorunlu hale getir.
+  enable_rollback_support: true  # Deployment sonrası hata durumunda geri alma mekanizması sağla.
+  use_containerization: true  # Kubernetes ve Docker kullanımını teşvik et.
+
+# 8. AI Kullanımı ve Kod Yönetimi
+ai_code_management:
+  require_user_confirmation_for_large_changes: true  # AI büyük değişiklikler yaparken onay iste.
+  detect_unused_code: true  # Kullanılmayan kodları tespit edip işaretle.
+  enforce_code_comments: true  # AI tarafından üretilen kodların yorumlanmasını zorunlu kıl.
+  log_ai_changes: true  # AI tarafından yapılan tüm değişiklikleri logla.
+
+# 9. Performans ve Bellek Yönetimi
+performance:
+  prioritize_performance: true  # Performansı her zaman önceliklendir.
+  max_file_size_kb: 500  # Düzenlenebilir maksimum dosya boyutu (KB).
+  restrict_parallel_tasks: true  # Aynı anda birden fazla dosya değiştirme.
+  max_cpu_usage: 80  # Maksimum CPU kullanımı % olarak belirlenir.
+  optimize_memory_usage: true  # Hafıza kullanımını minimumda tut.
+
+
+Kullanilmayan dosyalarin haricinde olan her dosyayi sil 
+Proje icinde ayni amaca hizmet eden ayni dosyalar olusturma 
+# 10. Full-Stack Geliştirme Kuralları
+full_stack:
+  backend:
+    preferred_frameworks:
+      - Node.js
+      - Express
+      - NestJS
+      - Django
+      - Flask
+    database_restrictions:
+      allowed:
+        - PostgreSQL
+        - MySQL
+        - MongoDB
+        - Redis
+      prevent_direct_sql_queries: true  # ORM kullanımı zorunlu.
+  frontend:
+    preferred_frameworks:
+      - React
+      - Next.js
+      - Vue.js
+      - Svelte
+    enforce_component_structure: true  # Bileşen bazlı yapı zorunlu.
+    modern_css_frameworks:
+      - TailwindCSS
+      - Chakra UI
+      - Material UI
+      - Bootstrap 5
+    prevent_inline_styles: true  # Inline CSS kullanımını engelle.
+    enforce_dark_mode_support: true  # Karanlık mod desteği eklenmeli.
+
+# 11. Loglama ve İzleme
+logging:
+  enable_logging: true  # Yapay zeka tarafından yapılan değişiklikleri logla.
+  log_file_path: logs/cursor_ai_changes.log  # Log dosyasının yolu.
+  max_log_size_mb: 10  # Maksimum log dosyası boyutu (MB).
+  track_ai_generated_changes: true  # AI tarafından yapılan değişiklikleri ayrı logla.
+
+# 12. Bağlam Koruma (Composer Değiştiğinde Unutmayı Önleme)
+context_management:
+  persist_project_context: true  # Proje bağlamını Composer değişse bile koru.
+  store_previous_sessions: true  # Önceki oturumları kaydet.
+  auto_reload_last_context: true  # Önceki çalışmayı otomatik olarak yükle.
+  prevent_context_loss_on_composer_change: true  # Composer değişse bile mevcut bilgileri unutma.
+  project_summary_file: project_summary.md  # AI, her başlatıldığında bu dosyayı okusun.

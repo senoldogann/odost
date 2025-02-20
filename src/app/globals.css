@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    @apply antialiased;
+  }
+
+  :root {
+    /* Açık tema için renkler */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 0 0% 0%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* ODOST özel renkler - Açık tema */
+    --odost-bg: 0 0% 100%;
+    --odost-text: 0 0% 0%;
+    --odost-primary: 221.2 83.2% 53.3%;
+    --odost-secondary: 210 40% 96.1%;
+    --odost-accent: 25 95% 53%;
+    --odost-muted: 210 40% 96.1%;
+    --odost-border: 0 0% 90%;
+
+    /* Admin panel renkleri - Açık tema */
+    --admin-text: 0 0% 0%;
+    --admin-bg: 0 0% 100%;
+    --admin-card: 0 0% 100%;
+    --admin-border: 0 0% 90%;
+    --admin-muted: 0 0% 45%;
+
+    /* ODOST özel bileşen renkleri - Açık tema */
+    --menu-item-bg: 0 0% 100%;
+    --menu-item-hover: 0 0% 95%;
+    --menu-text: 0 0% 0%;
+    --menu-description: 0 0% 45%;
+    --gallery-overlay: 0 0% 0% / 0.7;
+    --gallery-text: 0 0% 100%;
+    --atmosphere-bg: 0 0% 100%;
+    --contact-bg: 0 0% 98%;
+    --reservation-bg: 0 0% 100%;
+    --table-border: 0 0% 90%;
+  }
+
+  .dark {
+    /* Koyu tema için renkler */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    /* ODOST özel renkler - Koyu tema */
+    --odost-bg: 0 0% 7%;
+    --odost-text: 0 0% 100%;
+    --odost-primary: 217.2 91.2% 59.8%;
+    --odost-secondary: 217.2 32.6% 17.5%;
+    --odost-accent: 25 95% 53%;
+    --odost-muted: 215 20.2% 65.1%;
+    --odost-border: 217.2 32.6% 17.5%;
+
+    /* Admin panel renkleri - Koyu tema */
+    --admin-text: 0 0% 100%;
+    --admin-bg: 0 0% 7%;
+    --admin-card: 0 0% 10%;
+    --admin-border: 0 0% 20%;
+    --admin-muted: 215 20.2% 65.1%;
+
+    /* ODOST özel bileşen renkleri - Koyu tema */
+    --menu-item-bg: 0 0% 7%;
+    --menu-item-hover: 0 0% 12%;
+    --menu-text: 0 0% 100%;
+    --menu-description: 0 0% 65%;
+    --gallery-overlay: 0 0% 0% / 0.8;
+    --gallery-text: 0 0% 100%;
+    --atmosphere-bg: 271 81% 56%;
+    --contact-bg: 0 0% 7%;
+    --reservation-bg: 0 0% 7%;
+    --table-border: 0 0% 20%;
+  }
+
+  /* Mobil görünüm için text boyutları */
+  @media (max-width: 768px) {
+    h1 {
+      @apply text-2xl !important;
+    }
+    h2 {
+      @apply text-xl !important;
+    }
+    h3 {
+      @apply text-lg !important;
+    }
+    p, span, a, li {
+      @apply text-base !important;
+    }
+    .text-xl {
+      @apply text-lg !important;
+    }
+    .text-2xl {
+      @apply text-xl !important;
+    }
+    .text-3xl {
+      @apply text-2xl !important;
+    }
+    .text-4xl {
+      @apply text-3xl !important;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Genel tema geçiş animasyonları */
+.theme-transition {
+  @apply transition-colors duration-300;
+}
+
+/* Özel animasyonlar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delayed {
+  animation: fadeIn 0.8s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+/* Tema geçişleri için özel sınıflar */
+.bg-theme {
+  @apply bg-white dark:bg-black transition-colors duration-300;
+}
+
+.text-theme {
+  @apply text-black dark:text-white transition-colors duration-300;
+}
+
+.border-theme {
+  @apply border-black/10 dark:border-white/10 transition-colors duration-300;
+}
+
+.hover-theme {
+  @apply hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300;
+}
+
+/* Özel bileşen sınıfları */
+.menu-item {
+  @apply bg-[hsl(var(--menu-item-bg))] hover:bg-[hsl(var(--menu-item-hover))] transition-colors;
+}
+
+.menu-text {
+  @apply text-[hsl(var(--menu-text))];
+}
+
+.menu-description {
+  @apply text-[hsl(var(--menu-description))];
+}
+
+.gallery-overlay {
+  @apply bg-[hsl(var(--gallery-overlay))];
+}
+
+.gallery-text {
+  @apply text-[hsl(var(--gallery-text))];
+}
+
+.atmosphere-section {
+  @apply bg-gradient-to-br from-purple-700/80 via-purple-900/50 to-purple-800/30;
+}
+
+.contact-section {
+  @apply bg-[hsl(var(--contact-bg))];
+}
+
+.reservation-section {
+  @apply bg-[hsl(var(--reservation-bg))];
+}
+
+.table-border {
+  @apply border-[hsl(var(--table-border))];
+}
+
+/* Mobil menü animasyonları */
+.mobile-menu-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.mobile-menu-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.mobile-menu-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mobile-menu-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+/* Mobil menü arka plan */
+.mobile-menu-backdrop {
+  @apply fixed inset-0 bg-black/95 backdrop-blur-lg;
+  transition: background-color 200ms ease-in-out, backdrop-filter 200ms ease-in-out;
+}
+
+/* Mobil menü buton animasyonları */
+.menu-button-line {
+  @apply block w-6 h-0.5 bg-white transition-all duration-200 ease-in-out;
+}
+
+.menu-button-line-open {
+  @apply bg-white;
+}
+
+/* Admin panel özel stilleri */
+.admin-text {
+  color: hsl(var(--admin-text));
+}
+
+.admin-bg {
+  background-color: hsl(var(--admin-bg));
+}
+
+.admin-card {
+  background-color: hsl(var(--admin-card));
+  border: 1px solid hsl(var(--admin-border));
+}
+
+.admin-muted {
+  color: hsl(var(--admin-muted));
+}
+
+/* Swiper Özelleştirmeleri */
+.swiper-button-next,
+.swiper-button-prev {
+  color: white !important;
+  background: rgba(0, 0, 0, 0.5);
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50%;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 20px !important;
+}
+
+.swiper-pagination-bullet {
+  background: white !important;
+  opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+  opacity: 1;
+}
+
+/* Dark mode için */
+.dark .swiper-button-next,
+.dark .swiper-button-prev {
+  background: rgba(255, 255, 255, 0.2);
+  color: black !important;
+}
+
+.dark .swiper-pagination-bullet {
+  background: black !important;
+}
