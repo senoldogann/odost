@@ -6,6 +6,7 @@ import Script from "next/script";
 import "./globals.css";
 import CookieConsent from '@/components/CookieConsent';
 import Providers from '@/components/Providers';
+import { CompanyProvider } from '@/context/CompanyContext';
 
 const poppins = Poppins({ 
   weight: ['300', '400', '500', '600', '700'],
@@ -69,7 +70,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="fi">
+    <html lang="fi" suppressHydrationWarning>
       <head>
         {/* Google Analytics */}
         {analyticsSettings?.googleAnalyticsId && (
@@ -109,8 +110,10 @@ export default async function RootLayout({
       </head>
       <body className={poppins.className}>
         <Providers>
-          {children}
-          <CookieConsent />
+          <CompanyProvider>
+            {children}
+            <CookieConsent />
+          </CompanyProvider>
         </Providers>
         <Toaster position="top-right" />
       </body>
