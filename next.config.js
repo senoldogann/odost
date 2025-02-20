@@ -35,7 +35,10 @@ const nextConfig = {
   },
   experimental: {
     serverActions: true
-  }
+  },
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true
 }
 
 module.exports = nextConfig 
