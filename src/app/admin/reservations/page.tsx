@@ -133,74 +133,76 @@ export default function ReservationsPage() {
         </div>
       </div>
 
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden">
-        <table className="w-full text-white whitespace-nowrap">
-          <thead>
-            <tr className="bg-gray-900/50">
-              <th className="px-3 py-3 text-left">{t('admin.reservations.customerName')}</th>
-              <th className="px-3 py-3 text-left">{t('admin.reservations.email')}</th>
-              <th className="px-3 py-3 text-left w-24">{t('admin.reservations.date')}</th>
-              <th className="px-3 py-3 text-left w-20">{t('admin.reservations.time')}</th>
-              <th className="px-3 py-3 text-left w-20">{t('admin.reservations.guests')}</th>
-              <th className="px-3 py-3 text-left w-24">{t('admin.reservations.type')}</th>
-              <th className="px-3 py-3 text-left w-28">{t('admin.reservations.status')}</th>
-              <th className="px-3 py-3 text-left w-24">{t('admin.reservations.notes')}</th>
-              <th className="px-3 py-3 text-left w-32">{t('admin.common.edit')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredReservations.map((reservation, index) => (
-              <tr key={reservation.id} className={`border-t border-white/10 hover:bg-white/5 ${
-                index % 2 === 0 ? '' : 'bg-white/5'
-              }`}>
-                <td className="px-3 py-2">{reservation.user.name}</td>
-                <td className="px-3 py-2">{reservation.user.email}</td>
-                <td className="px-3 py-2">{formatDate(reservation.date)}</td>
-                <td className="px-3 py-2">{reservation.time}</td>
-                <td className="px-3 py-2">{reservation.guests}</td>
-                <td className="px-3 py-2">{reservation.type}</td>
-                <td className="px-3 py-2">
-                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor(reservation.status)}`}>
-                    {t(`admin.reservations.${reservation.status.toLowerCase()}`)}
-                  </span>
-                </td>
-                <td className="px-3 py-2">
-                  {reservation.notes && (
-                    <button
-                      onClick={() => setSelectedNote({
-                        note: reservation.notes || '',
-                        customerName: reservation.user.name
-                      })}
-                      className="text-blue-400 hover:text-blue-300 text-sm"
-                    >
-                      {t('admin.reservations.showNotes')}
-                    </button>
-                  )}
-                </td>
-                <td className="px-3 py-2">
-                  {reservation.status !== 'CANCELLED' && (
-                    <div className="flex gap-1">
-                      {reservation.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleStatusChange(reservation.id, 'CONFIRMED')}
-                          className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs hover:bg-green-500/30"
-                        >
-                          {t('admin.reservations.confirm')}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleStatusChange(reservation.id, 'CANCELLED')}
-                        className="px-2 py-1 bg-red-500/20 text-red-300 rounded text-xs hover:bg-red-500/30"
-                      >
-                        {t('admin.reservations.cancel')}
-                      </button>
-                    </div>
-                  )}
-                </td>
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 overflow-x-auto">
+        <div className="min-w-[1200px]">
+          <table className="w-full text-white">
+            <thead>
+              <tr className="bg-gray-900/50">
+                <th className="px-3 py-3 text-left">{t('admin.reservations.customerName')}</th>
+                <th className="px-3 py-3 text-left">{t('admin.reservations.email')}</th>
+                <th className="px-3 py-3 text-left w-24">{t('admin.reservations.date')}</th>
+                <th className="px-3 py-3 text-left w-20">{t('admin.reservations.time')}</th>
+                <th className="px-3 py-3 text-left w-20">{t('admin.reservations.guests')}</th>
+                <th className="px-3 py-3 text-left w-24">{t('admin.reservations.type')}</th>
+                <th className="px-3 py-3 text-left w-28">{t('admin.reservations.status')}</th>
+                <th className="px-3 py-3 text-left w-24">{t('admin.reservations.notes')}</th>
+                <th className="px-3 py-3 text-left w-32">{t('admin.common.edit')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredReservations.map((reservation, index) => (
+                <tr key={reservation.id} className={`border-t border-white/10 hover:bg-white/5 ${
+                  index % 2 === 0 ? '' : 'bg-white/5'
+                }`}>
+                  <td className="px-3 py-2">{reservation.user.name}</td>
+                  <td className="px-3 py-2">{reservation.user.email}</td>
+                  <td className="px-3 py-2">{formatDate(reservation.date)}</td>
+                  <td className="px-3 py-2">{reservation.time}</td>
+                  <td className="px-3 py-2">{reservation.guests}</td>
+                  <td className="px-3 py-2">{reservation.type}</td>
+                  <td className="px-3 py-2">
+                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(reservation.status)}`}>
+                      {t(`admin.reservations.${reservation.status.toLowerCase()}`)}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    {reservation.notes && (
+                      <button
+                        onClick={() => setSelectedNote({
+                          note: reservation.notes || '',
+                          customerName: reservation.user.name
+                        })}
+                        className="text-blue-400 hover:text-blue-300 text-sm"
+                      >
+                        {t('admin.reservations.showNotes')}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {reservation.status !== 'CANCELLED' && (
+                      <div className="flex gap-2">
+                        {reservation.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleStatusChange(reservation.id, 'CONFIRMED')}
+                            className="px-3 py-1.5 bg-green-500/20 text-green-300 rounded text-xs hover:bg-green-500/30"
+                          >
+                            {t('admin.reservations.confirm')}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleStatusChange(reservation.id, 'CANCELLED')}
+                          className="px-3 py-1.5 bg-red-500/20 text-red-300 rounded text-xs hover:bg-red-500/30"
+                        >
+                          {t('admin.reservations.cancel')}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Not görüntüleme modalı */}
