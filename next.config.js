@@ -34,7 +34,9 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   experimental: {
-    serverActions: true
+    serverActions: {
+      bodySizeLimit: '2mb'
+    }
   },
   poweredByHeader: false,
   reactStrictMode: true,
