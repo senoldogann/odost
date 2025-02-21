@@ -2,8 +2,33 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
-
 import bcrypt from 'bcryptjs';
+
+// Başarısız giriş denemelerini bildirmek için fonksiyon
+async function notifyFailedLogin(email: string, error: string) {
+  try {
+    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/failed-login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        timestamp: new Date().toISOString(),
+        error,
+        userAgent: 'Admin Panel',
+        ip: 'IP bilgisi alınamadı',
+        location: 'Konum bilgisi alınamadı'
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed login notification error:', await response.text());
+    }
+  } catch (error) {
+    console.error('Failed login notification error:', error);
+  }
+}
 
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -16,6 +41,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          await notifyFailedLogin(credentials?.email || 'unknown', 'Sähköposti ja salasana vaaditaan');
           throw new Error('Sähköposti ja salasana vaaditaan');
         }
 
@@ -24,12 +50,14 @@ const handler = NextAuth({
         });
 
         if (!user || !user.password) {
+          await notifyFailedLogin(credentials.email, 'Käyttäjää ei löydy');
           throw new Error('Käyttäjää ei löydy');
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
+          await notifyFailedLogin(credentials.email, 'Virheellinen salasana');
           throw new Error('Virheellinen salasana');
         }
 
