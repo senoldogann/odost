@@ -6,14 +6,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // Ravintola ja Baari yhteinen käyttäjämalli
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
   email         String    @unique
   password      String
@@ -32,7 +31,7 @@ enum Role {
 
 // Ruoka- ja juomalistat
 model MenuItem {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
   price       Float     // Hinta euroina
@@ -54,8 +53,8 @@ enum MenuType {
 
 // Pöytävaraukset
 model Reservation {
-  id          String    @id @default(cuid())
-  userId      String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
   user        User      @relation(fields: [userId], references: [id])
   date        DateTime
   time        String
@@ -80,12 +79,12 @@ enum ReservationStatus {
 
 // Lahjakortit
 model GiftCard {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   code        String    @unique
   amount      Float     // Arvo euroina
   balance     Float     // Saldo euroina
   isActive    Boolean   @default(true)
-  userId      String
+  userId      String    @db.ObjectId
   user        User      @relation(fields: [userId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -93,7 +92,7 @@ model GiftCard {
 
 // Yhteydenottolomakkeet
 model ContactForm {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   email       String
   subject     String
@@ -118,7 +117,7 @@ enum ContactStatus {
 
 // Galleria
 model Gallery {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
   imageUrl    String
@@ -137,7 +136,7 @@ enum GalleryType {
 
 // Footer ayarları
 model Footer {
-  id           String   @id @default(cuid())
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   address      String
   phone        String
   email        String
@@ -149,7 +148,7 @@ model Footer {
 
 // Atmosfer etkinlikleri
 model AtmosphereEvent {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
   schedule    String
@@ -163,55 +162,56 @@ model AtmosphereEvent {
 
 // Header Menü modeli
 model HeaderMenu {
-  id          String    @id @default(cuid())
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   path        String
-  order       Int       @default(0)
-  parentId    String?
-  parent      HeaderMenu?  @relation("MenuItems", fields: [parentId], references: [id])
+  order       Int         @default(0)
+  parentId    String?     @db.ObjectId
+  parent      HeaderMenu?  @relation("MenuItems", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children    HeaderMenu[] @relation("MenuItems")
+  isActive    Boolean     @default(true)
+  type        MenuType
+  siteTitle   String?     // Site başlığı
+  siteLogo    String?     // Site logosu
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model HeroSection {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  subtitle    String?
+  imageUrl    String
+  type        MenuType // RAVINTOLA, BAARI
   isActive    Boolean   @default(true)
-  type        MenuType  // RAVINTOLA veya BAARI
-  siteTitle   String?   // Site başlığı
-  siteLogo    String?   // Site logosu
+  buttonText  String?   // Buton metni
+  buttonUrl   String?   // Buton URL'i
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 
-model HeroSection {
-  id        String   @id @default(cuid())
-  title     String
-  subtitle  String?
-  imageUrl  String
-  type      MenuType // RAVINTOLA, BAARI
-  isActive  Boolean  @default(true)
-  buttonText String? // Buton metni
-  buttonUrl  String? // Buton URL'i
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model SiteSettings {
-  type               String    @id @unique
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  type               String    @unique
   isActive           Boolean   @default(true)
   maintenanceMode    Boolean   @default(false)
-  maintenanceMessage String?   @db.Text
+  maintenanceMessage String?
   title              String
-  description        String    @db.Text
+  description        String
   keywords           String[]
-  ogTitle           String?
-  ogDescription     String?    @db.Text
-  ogImage           String?
-  twitterCard       String?
-  twitterTitle      String?
-  twitterDescription String?   @db.Text
-  twitterImage      String?
-  googleAnalyticsId String?
-  facebookPixelId   String?
-  robotsTxt         String?    @db.Text
-  sitemapXml        String?    @db.Text
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  ogTitle            String?
+  ogDescription      String?
+  ogImage            String?
+  twitterCard        String?
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImage       String?
+  googleAnalyticsId  String?
+  facebookPixelId    String?
+  robotsTxt          String?
+  sitemapXml         String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@map("site_settings")
 } 
