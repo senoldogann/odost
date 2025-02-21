@@ -9,9 +9,7 @@ const prismaClientSingleton = () => {
     log: ['error', 'warn'],
     datasources: {
       db: {
-        url: process.env.NODE_ENV === 'production'
-          ? process.env.DATABASE_URL // Transaction mode için pooler URL (port 6543)
-          : process.env.DIRECT_URL   // Session mode için direct URL (port 5432)
+        url: process.env.DATABASE_URL
       }
     }
   })
