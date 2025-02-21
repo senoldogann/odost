@@ -8,6 +8,7 @@ interface FooterData {
   address: string;
   phone: string;
   email: string;
+  description: string;
   openingHours: {
     [key: string]: {
       open: string;
@@ -140,7 +141,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-theme">{siteName}</h2>
             <p className="text-sm menu-description">
-              Moderni ravintola- ja baarikokemus Helsingissä
+              {footerData?.description || 'Moderni ravintola- ja baarikokemus Helsingissä'}
             </p>
             <div className="flex space-x-4 pt-4">
               {footerData.socialMedia.facebook && (

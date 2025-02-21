@@ -45,7 +45,6 @@ export default function GallerySection({ type, images }: GallerySectionProps) {
     return null;
   }
 
-  // Resimleri filtrele ve geçerli URL'leri kontrol et
   const validImages = images.filter(image => isValidImageUrl(image.imageUrl));
 
   if (validImages.length === 0) {
@@ -57,33 +56,34 @@ export default function GallerySection({ type, images }: GallerySectionProps) {
   }
 
   return (
-    <div className="w-full py-8 sm:py-12">
-      {/* Galeri ızgara görünümü */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 max-w-7xl mx-auto">
-        {validImages.map((image) => (
-          <motion.div
-            key={image.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
-            onClick={() => setSelectedImage(image)}
-            className="relative aspect-square cursor-pointer group rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 mx-auto w-full max-w-[260px] sm:max-w-[280px] lg:max-w-[340px]"
-          >
-            <Image
-              src={isValidImageUrl(image.imageUrl) ? image.imageUrl : '/images/default-gallery.jpg'}
-              alt={image.title || 'Galeri resmi'}
-              fill
-              sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-3 sm:p-4 lg:p-6">
-              <h3 className="text-white text-sm sm:text-base lg:text-lg font-medium truncate">{image.title}</h3>
-              {image.description && (
-                <p className="text-white/90 text-xs sm:text-sm mt-1 sm:mt-2 line-clamp-2">{image.description}</p>
-              )}
-            </div>
-          </motion.div>
-        ))}
+    <section className="py-8 bg-white dark:bg-black">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {validImages.map((image, index) => (
+            <motion.div
+              key={image.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              onClick={() => setSelectedImage(image)}
+              className="relative aspect-[4/3] cursor-pointer group rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 w-full"
+            >
+              <Image
+                src={isValidImageUrl(image.imageUrl) ? image.imageUrl : '/images/default-gallery.jpg'}
+                alt={image.title || 'Galeri resmi'}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+                <h3 className="text-lg font-bold text-white mb-1">{image.title}</h3>
+                {image.description && (
+                  <p className="text-white/90 text-sm line-clamp-2">{image.description}</p>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Modal görünümü */}
@@ -150,6 +150,6 @@ export default function GallerySection({ type, images }: GallerySectionProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </section>
   );
 } 

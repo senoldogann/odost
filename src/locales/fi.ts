@@ -380,10 +380,15 @@ export const fi = {
     footer: {
       title: 'Alatunnisteen hallinta',
       contactInfo: 'Yhteystiedot',
+      description: 'Kuvaus',
       address: 'Osoite',
       phone: 'Puhelin',
       email: 'Sähköposti',
       openingHours: 'Aukioloajat',
+      socialMedia: 'Sosiaalinen media',
+      facebookUrl: 'Facebook URL',
+      instagramUrl: 'Instagram URL',
+      twitterUrl: 'Twitter URL',
       days: {
         maanantai: 'Maanantai',
         tiistai: 'Tiistai',
@@ -393,17 +398,13 @@ export const fi = {
         lauantai: 'Lauantai',
         sunnuntai: 'Sunnuntai'
       },
-      socialMedia: 'Sosiaalinen media',
-      facebookUrl: 'Facebook URL',
-      instagramUrl: 'Instagram URL',
-      twitterUrl: 'Twitter URL',
       fetchError: 'Alatunnisteen tietojen haku epäonnistui',
       fetchErrorLog: 'Virhe haettaessa alatunnisteen tietoja:',
-      fetchErrorToast: 'Alatunnisteen tietojen lataus epäonnistui',
+      fetchErrorToast: 'Alatunnisteen tietojen haussa tapahtui virhe',
       updateError: 'Alatunnisteen päivitys epäonnistui',
+      updateSuccess: 'Alatunniste päivitetty',
       updateErrorLog: 'Virhe päivitettäessä alatunnistetta:',
-      updateErrorToast: 'Alatunnisteen päivitys epäonnistui',
-      updateSuccess: 'Alatunniste päivitetty onnistuneesti'
+      updateErrorToast: 'Alatunnisteen päivityksessä tapahtui virhe'
     }
   }
 }; 

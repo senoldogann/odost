@@ -83,9 +83,43 @@ export default function MenuPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-black">
         <HeaderMenu type="RAVINTOLA" />
-        <div className="flex justify-center items-center h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+        
+        {/* Hero Section Skeleton */}
+        <div className="relative h-[40vh] md:h-[50vh] bg-gray-200 dark:bg-gray-800 animate-pulse">
+          <div className="relative h-full flex flex-col items-center justify-center">
+            <div className="h-8 w-48 bg-gray-300 dark:bg-gray-700 rounded-lg mb-4"></div>
+            <div className="h-4 w-64 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
+          </div>
         </div>
+
+        <main className="container mx-auto px-4 py-12">
+          {/* Search and Filter Skeleton */}
+          <div className="flex flex-col gap-6 mb-8">
+            <div className="w-full max-w-xl mx-auto h-12 bg-gray-200 dark:bg-gray-800 rounded-xl"></div>
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-10 w-24 bg-gray-200 dark:bg-gray-800 rounded-xl"></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Menu Items Grid Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 max-w-7xl mx-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 p-3">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <div className="h-5 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded"></div>
+                  <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+
         <Footer />
       </div>
     );

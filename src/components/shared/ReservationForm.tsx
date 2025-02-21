@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { fi } from 'date-fns/locale';
 import { toast } from 'react-hot-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function ReservationForm() {
   const [formData, setFormData] = useState({
@@ -17,46 +18,30 @@ export default function ReservationForm() {
     notes: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!recaptchaValue) {
+      toast.error('Vahvista olevasi ihminen reCAPTCHA:n avulla.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Önce kullanıcı oluştur
-      const userResponse = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: 'temporary', // Geçici şifre
-        }),
-      });
-
-      if (!userResponse.ok) {
-        const errorData = await userResponse.json();
-        throw new Error(errorData.error || 'Käyttäjän luominen epäonnistui');
-      }
-
-      const userData = await userResponse.json();
-
-      // Sonra rezervasyon oluştur
+      // Direkt rezervasyon oluştur
       const reservationResponse = await fetch('/api/reservations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: userData.id,
+          ...formData,
           date: new Date(formData.date).toISOString(),
-          time: formData.time,
           guests: parseInt(formData.guests),
-          type: formData.type,
-          notes: formData.notes,
-          phone: formData.phone, // Telefon numarasını da ekleyelim
+          recaptchaToken: recaptchaValue
         }),
       });
 
@@ -82,6 +67,12 @@ export default function ReservationForm() {
         type: 'RAVINTOLA',
         notes: ''
       });
+      setRecaptchaValue(null);
+
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
+
     } catch (error) {
       console.error('Varausvirhe:', error);
       toast.error(error instanceof Error ? error.message : 'Varaus epäonnistui. Yritä uudelleen.');
@@ -93,6 +84,10 @@ export default function ReservationForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRecaptchaChange = (value: string | null) => {
+    setRecaptchaValue(value);
   };
 
   // Müsait saatler
@@ -241,10 +236,20 @@ export default function ReservationForm() {
         />
       </div>
 
-      <div>
+      {/* reCAPTCHA */}
+      <div className="flex flex-col items-center space-y-4">
+        <div className="bg-white dark:bg-black rounded-lg">
+          <ReCAPTCHA
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+            onChange={handleRecaptchaChange}
+            theme="light"
+            className="dark:[&>div]:!bg-black dark:[&>div]:border-0 dark:[&>div>div>iframe]:border-0 dark:[&>div>div>iframe]:!bg-black dark:[&>div>div]:!bg-black"
+          />
+        </div>
+
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !recaptchaValue}
           className="w-full md:w-auto px-8 py-3 bg-white dark:bg-black text-black dark:text-white font-semibold rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Lähetetään...' : 'Tee varaus'}

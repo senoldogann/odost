@@ -8,6 +8,7 @@ import "./globals.css";
 import CookieConsent from '@/components/CookieConsent';
 import Providers from '@/components/Providers';
 import { CompanyProvider } from '@/context/CompanyContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 const poppins = Poppins({ 
   weight: ['300', '400', '500', '600', '700'],
@@ -91,6 +92,9 @@ export default async function RootLayout({
           </>
         )}
 
+        {/* reCAPTCHA Script */}
+        <Script src="https://www.google.com/recaptcha/api.js" async defer />
+
         {/* Facebook Pixel */}
         {analyticsSettings?.facebookPixelId && (
           <Script id="facebook-pixel" strategy="afterInteractive">
@@ -110,12 +114,14 @@ export default async function RootLayout({
         )}
       </head>
       <body className={poppins.className}>
-        <Providers>
-          <CompanyProvider>
-            {children}
-            <CookieConsent />
-          </CompanyProvider>
-        </Providers>
+        <LanguageProvider>
+          <Providers>
+            <CompanyProvider>
+              {children}
+              <CookieConsent />
+            </CompanyProvider>
+          </Providers>
+        </LanguageProvider>
         <Toaster position="top-right" />
       </body>
     </html>

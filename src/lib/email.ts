@@ -54,7 +54,7 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
     const textWithFooter = `${text}\n\n--\n${footerInfo.companyName}\n${footerInfo.address}\nPuh: ${footerInfo.phone}\nEmail: ${footerInfo.email}`;
 
     const info = await transporter.sendMail({
-      from: `"${process.env.SITE_NAME || 'Ravintola & Baari'}" <${process.env.EMAIL_USER}>`,
+      from: `"ODOST Restaurant & Bar" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text: textWithFooter,
@@ -64,7 +64,7 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
     console.log('Sähköposti lähetetty:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Sähköpostin lähetysvirhe:', error);
-    throw new Error('Sähköpostia ei voitu lähettää');
+    console.error('E-posta gönderme hatası:', error);
+    throw new Error('E-posta gönderilemedi');
   }
 } 

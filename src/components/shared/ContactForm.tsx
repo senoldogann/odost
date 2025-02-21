@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 interface ContactFormProps {
   type: 'RAVINTOLA' | 'BAARI' | 'YLEINEN';
@@ -16,9 +17,16 @@ export default function ContactForm({ type }: ContactFormProps) {
     type: type
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!recaptchaValue) {
+      toast.error('Vahvista olevasi ihminen reCAPTCHA:n avulla.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -27,7 +35,10 @@ export default function ContactForm({ type }: ContactFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken: recaptchaValue
+        }),
       });
 
       if (!response.ok) {
@@ -44,6 +55,7 @@ export default function ContactForm({ type }: ContactFormProps) {
         message: '',
         type: type
       });
+      setRecaptchaValue(null);
     } catch (error) {
       console.error('Viesti lähetys virhe:', error);
       toast.error('Viestin lähetys epäonnistui. Yritä uudelleen.');
@@ -55,6 +67,10 @@ export default function ContactForm({ type }: ContactFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRecaptchaChange = (value: string | null) => {
+    setRecaptchaValue(value);
   };
 
   return (
@@ -139,10 +155,19 @@ export default function ContactForm({ type }: ContactFormProps) {
           />
         </div>
 
-        <div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="bg-white dark:bg-black rounded-lg">
+            <ReCAPTCHA
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              onChange={handleRecaptchaChange}
+              theme="light"
+              className="dark:[&>div]:!bg-black dark:[&>div]:border-0 dark:[&>div>div>iframe]:border-0 dark:[&>div>div>iframe]:!bg-black dark:[&>div>div]:!bg-black"
+            />
+          </div>
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !recaptchaValue}
             className="w-full md:w-auto px-8 py-3 bg-white dark:bg-black text-black dark:text-white font-semibold rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Lähetetään...' : 'Lähetä viesti'}

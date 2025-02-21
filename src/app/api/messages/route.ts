@@ -27,6 +27,25 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // reCAPTCHA doğrulama
+    const recaptchaVerification = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${body.recaptchaToken}`,
+    });
+
+    const recaptchaData = await recaptchaVerification.json();
+
+    if (!recaptchaData.success) {
+      return new Response(JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const message = await prisma.contactForm.create({
       data: {
         name: body.name,
@@ -77,7 +96,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(message);
   } catch (error) {
-    return NextResponse.json({ error: 'Mesaj eklenemedi' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Mesaj gönderilemedi' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 

@@ -140,6 +140,7 @@ model Footer {
   address      String
   phone        String
   email        String
+  description  String   @default("Moderni ravintola- ja baarikokemus Helsingissä")
   openingHours Json
   socialMedia  Json
   createdAt    DateTime @default(now())

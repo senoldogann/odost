@@ -22,10 +22,12 @@ export async function GET(request: Request) {
           address: process.env.SITE_ADDRESS || 'Mannerheimintie 100, 00100 Helsinki',
           phone: process.env.SITE_PHONE || '+358 50 123 4567',
           email: process.env.SITE_EMAIL || 'info@odost.fi',
+          description: 'Moderni ravintola- ja baarikokemus Oulussa',
           openingHours: defaultOpeningHours,
           socialMedia: {
-            facebook: 'https://facebook.com/odost',
-            instagram: 'https://instagram.com/odost'
+            facebook: 'https://www.facebook.com/p/Utaj%C3%A4rven-Pizza-Kebab-100057203029423/',
+            instagram: 'https://www.instagram.com/odostravintola/',
+            twitter: 'https://twitter.com/odostravintola',
           }
         }
       });
@@ -62,18 +64,24 @@ export async function PUT(request: Request) {
         address: body.address,
         phone: body.phone,
         email: body.email,
+        description: body.description,
         openingHours: body.openingHours || defaultOpeningHours,
-        socialMedia: body.socialMedia
+        socialMedia: body.socialMedia || {
+          facebook: 'https://www.facebook.com/p/Utaj%C3%A4rven-Pizza-Kebab-100057203029423/',
+          instagram: 'https://www.instagram.com/odostravintola/',
+          twitter: 'https://twitter.com/odostravintola'
+        }
       },
       create: {
         address: body.address || process.env.SITE_ADDRESS || '',
         phone: body.phone || process.env.SITE_PHONE || '',
         email: body.email || process.env.SITE_EMAIL || '',
+        description: body.description || 'Moderni ravintola- ja baarikokemus Helsingissä',
         openingHours: body.openingHours || defaultOpeningHours,
         socialMedia: body.socialMedia || {
-          facebook: '',
-          instagram: '',
-          twitter: ''
+          facebook: 'https://www.facebook.com/p/Utaj%C3%A4rven-Pizza-Kebab-100057203029423/',
+          instagram: 'https://www.instagram.com/odostravintola/',
+          twitter: 'https://twitter.com/odostravintola'
         }
       }
     });

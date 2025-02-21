@@ -8,6 +8,24 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
+    // reCAPTCHA doğrulama
+    const recaptchaVerification = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${body.recaptchaToken}`,
+    });
+
+    const recaptchaData = await recaptchaVerification.json();
+
+    if (!recaptchaData.success) {
+      return new Response(JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Kullanıcının zaten var olup olmadığını kontrol et
     const existingUser = await prisma.user.findUnique({
       where: { email: body.email }

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Hero from '@/components/Hero';
 import MenuSection from '@/components/shared/MenuSection';
 import GallerySection from '@/components/shared/GallerySection';
 import AtmosphereSection from '@/components/shared/AtmosphereSection';
 import Footer from '@/components/Footer';
 import HeaderMenu from '@/components/HeaderMenu';
+
+// Loading komponenti
+const PageSkeleton = () => null;
 
 export default function RestaurantPage() {
   const [galleryImages, setGalleryImages] = useState([]);
@@ -37,7 +40,13 @@ export default function RestaurantPage() {
       {/* Öne Çıkan Yemekler */}
       <div className="bg-white dark:bg-black">
         <div className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Korostetut ruoat</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-3xl font-bold text-center mb-4">Korostetut ruoat</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           <MenuSection />
         </div>
       </div>
@@ -45,7 +54,13 @@ export default function RestaurantPage() {
       {/* Atmosfer Bölümü */}
       <section className="py-12 dark:atmosphere-section bg-white dark:bg-transparent">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-theme">Tunnelma & Erikoisuudet</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Tunnelma & Erikoisuudet</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           <AtmosphereSection type="RAVINTOLA" />
         </div>
       </section>
@@ -53,7 +68,13 @@ export default function RestaurantPage() {
       {/* Galeri Bölümü */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-theme">Galleria</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Galleria</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           {!isLoading && <GallerySection type="RAVINTOLA" images={galleryImages} />}
         </div>
       </section>

@@ -8,6 +8,7 @@ interface FooterData {
   address: string;
   phone: string;
   email: string;
+  description: string;
   openingHours: {
     [key: string]: {
       open: string;
@@ -47,11 +48,12 @@ export default function FooterSettings() {
     address: '',
     phone: '',
     email: '',
+    description: '',
     openingHours: defaultOpeningHours,
     socialMedia: {
-      facebook: '',
-      instagram: '',
-      twitter: ''
+      facebook: 'https://www.facebook.com/p/Utaj%C3%A4rven-Pizza-Kebab-100057203029423/',
+      instagram: 'https://www.instagram.com/odostravintola/',
+      twitter: 'https://twitter.com/odostravintola'
     }
   });
 
@@ -64,9 +66,18 @@ export default function FooterSettings() {
       const response = await fetch('/api/footer');
       if (!response.ok) throw new Error(t('admin.footer.fetchError'));
       const data = await response.json();
+      
+      // Varsayılan sosyal medya değerlerini kontrol et
+      const defaultSocialMedia = {
+        facebook: 'https://www.facebook.com/p/Utaj%C3%A4rven-Pizza-Kebab-100057203029423/',
+        instagram: 'https://www.instagram.com/odostravintola/',
+        twitter: 'https://twitter.com/odostravintola'
+      };
+
       setFooterData(data || {
         ...footerData,
-        openingHours: defaultOpeningHours
+        openingHours: defaultOpeningHours,
+        socialMedia: data?.socialMedia || defaultSocialMedia
       });
     } catch (error) {
       console.error(t('admin.footer.fetchErrorLog'), error);
@@ -139,6 +150,16 @@ export default function FooterSettings() {
         <div className="bg-white/5 p-6 rounded-lg space-y-4">
           <h2 className="text-xl font-semibold mb-4 text-white">{t('admin.footer.contactInfo')}</h2>
           
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">{t('admin.footer.description')}</label>
+            <textarea
+              value={footerData.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white"
+              rows={2}
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-white mb-2">{t('admin.footer.address')}</label>
             <textarea

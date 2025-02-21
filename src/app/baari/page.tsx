@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Hero from '@/components/Hero';
 import DrinksSection from '@/components/shared/DrinksSection';
 import GallerySection from '@/components/shared/GallerySection';
 import AtmosphereSection from '@/components/shared/AtmosphereSection';
 import Footer from '@/components/Footer';
 import HeaderMenu from '@/components/HeaderMenu';
+
+// Loading komponenti
+const PageSkeleton = () => null;
 
 export default function BarPage() {
   const [galleryImages, setGalleryImages] = useState([]);
@@ -37,7 +40,13 @@ export default function BarPage() {
       {/* Öne Çıkan İçecekler */}
       <div className="bg-white dark:bg-black">
         <div className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Korostetut juomat</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-3xl font-bold text-center mb-4">Korostetut juomat</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           <DrinksSection />
         </div>
       </div>
@@ -45,7 +54,13 @@ export default function BarPage() {
       {/* Atmosfer Bölümü */}
       <section className="py-12 dark:atmosphere-section bg-white dark:bg-transparent">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-theme">Tunnelma & Tapahtumat</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Tunnelma & Tapahtumat</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           <AtmosphereSection type="BAARI" />
         </div>
       </section>
@@ -53,7 +68,13 @@ export default function BarPage() {
       {/* Galeri Bölümü */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-theme">Galleria</h2>
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Galleria</h2>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
+              <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
+            </div>
+          </div>
           {!isLoading && <GallerySection type="BAARI" images={galleryImages} />}
         </div>
       </section>
