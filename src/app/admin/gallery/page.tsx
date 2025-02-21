@@ -30,7 +30,12 @@ export default function GalleryManagement() {
 
   // URL doğrulama
   const isValidImageUrl = (url: string) => {
-    return url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null;
+    const trimmedUrl = url.trim();
+    return trimmedUrl !== '' && (
+      trimmedUrl.startsWith('http://') || 
+      trimmedUrl.startsWith('https://') || 
+      trimmedUrl.startsWith('/')
+    );
   };
 
   useEffect(() => {
@@ -60,11 +65,6 @@ export default function GalleryManagement() {
 
     if (!newItem.imageUrl) {
       toast.error('Kuvan URL vaaditaan');
-      return;
-    }
-
-    if (!isValidImageUrl(newItem.imageUrl)) {
-      toast.error('Virheellinen kuvan URL. Sallitut muodot: JPEG, JPG, PNG, WEBP');
       return;
     }
 
