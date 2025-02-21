@@ -21,10 +21,26 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const status = searchParams.get('status');
 
+    console.log('API çağrısı alındı:', { type, status });
+
+    // Filtreleme kriterlerini oluştur
     const where: any = {};
-    if (type) where.type = type;
+    
+    // Tip filtresi
+    if (type && type !== 'ALL') {
+      where.type = type;
+    }
+    
+    // Durum filtresi
+    if (status && status !== 'ALL') {
+      where.status = status;
+    }
 
+    console.log('Filtreleme kriterleri:', where);
+
+    // Rezervasyonları getir
     const reservations = await prisma.reservation.findMany({
       where,
       include: {
@@ -35,15 +51,21 @@ export async function GET(request: Request) {
           }
         }
       },
-      orderBy: [
-        { date: 'asc' },
-        { time: 'asc' }
-      ]
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
+
+    console.log('Bulunan rezervasyon sayısı:', reservations.length);
+    
+    // NextResponse kullan
     return NextResponse.json(reservations);
   } catch (error) {
     console.error('Rezervasyon getirme hatası:', error);
-    return NextResponse.json({ error: 'Varauksia ei voitu tehdä' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Varauksia ei voitu hakea' }, 
+      { status: 500 }
+    );
   }
 }
 
@@ -77,11 +99,10 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      // Geçici şifre oluştur
+      // Yeni kullanıcı oluştur
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-      // Yeni kullanıcı oluştur
       user = await prisma.user.create({
         data: {
           name: body.name,
@@ -89,7 +110,15 @@ export async function POST(request: Request) {
           password: hashedPassword
         }
       });
+    } else {
+      // Mevcut kullanıcının adını güncelle
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { name: body.name }
+      });
     }
+
+    console.log('Kullanıcı bilgileri:', { userId: user.id, name: user.name, email: user.email });
 
     // Rezervasyon oluştur
     const reservation = await prisma.reservation.create({
@@ -101,8 +130,18 @@ export async function POST(request: Request) {
         type: body.type,
         notes: body.notes || '',
         status: 'PENDING'
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
       }
     });
+
+    console.log('Oluşturulan rezervasyon:', reservation);
 
     // E-posta gönder
     await sendEmail({

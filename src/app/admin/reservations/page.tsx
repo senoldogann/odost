@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fi } from 'date-fns/locale';
 import { toast } from 'react-hot-toast';
@@ -15,7 +15,7 @@ interface Reservation {
   date: string;
   time: string;
   guests: number;
-  type: 'RAVINTOLA' | 'BAARI';
+  type: 'RAVINTOLA' | 'BAARI' | 'ALL';
   status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
   notes?: string;
 }
@@ -23,7 +23,7 @@ interface Reservation {
 export default function ReservationsPage() {
   const { t } = useLanguage();
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [selectedType, setSelectedType] = useState<'RAVINTOLA' | 'BAARI'>('RAVINTOLA');
+  const [selectedType, setSelectedType] = useState<'RAVINTOLA' | 'BAARI' | 'ALL'>('ALL');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNote, setSelectedNote] = useState<{ note: string; customerName: string } | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<'ALL' | 'CANCELLED'>('ALL');
@@ -31,24 +31,84 @@ export default function ReservationsPage() {
   const [selectedReservation, setSelectedReservation] = useState<string | null>(null);
 
   // Rezervasyonları getir
-  useEffect(() => {
-    fetchReservations();
-  }, [selectedType]);
-
   const fetchReservations = async () => {
     try {
-      const response = await fetch(
-        `/api/reservations?type=${selectedType}`
-      );
-      if (!response.ok) throw new Error(t('admin.common.error'));
+      setIsLoading(true);
+      console.log('Fetching reservations:', { selectedType, selectedStatus });
+
+      // Query parametrelerini oluştur
+      const queryParams = new URLSearchParams();
+      if (selectedType && selectedType !== 'ALL') {
+        queryParams.append('type', selectedType);
+      }
+      if (selectedStatus && selectedStatus !== 'ALL') {
+        queryParams.append('status', selectedStatus);
+      }
+
+      const url = `/api/reservations${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      console.log('Fetch URL:', url);
+
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        console.error('API yanıt hatası:', response.status, response.statusText);
+        const errorData = await response.json();
+        console.error('API hata detayı:', errorData);
+        throw new Error(t('admin.common.error'));
+      }
+      
       const data = await response.json();
-      setReservations(data);
+      console.log('API yanıtı:', data);
+
+      if (Array.isArray(data)) {
+        const formattedReservations = data.map(reservation => ({
+          ...reservation,
+          date: new Date(reservation.date).toISOString()
+        }));
+        console.log('Formatlanmış rezervasyonlar:', formattedReservations);
+        setReservations(formattedReservations);
+      } else {
+        console.error('API yanıtı dizi değil:', data);
+        throw new Error('Geçersiz API yanıtı');
+      }
     } catch (error) {
+      console.error('Rezervasyon getirme hatası:', error);
       toast.error(t('admin.common.error'));
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Filtreleme mantığını güncelle
+  const filteredReservations = useMemo(() => {
+    console.log('Filtreleme başlıyor:', { selectedStatus, selectedType, totalReservations: reservations.length });
+    
+    return reservations.filter(res => {
+      // Durum filtresi
+      const statusMatch = selectedStatus === 'ALL' 
+        ? res.status !== 'CANCELLED' // ALL seçiliyse sadece iptal edilmemiş rezervasyonları göster
+        : res.status === selectedStatus;
+
+      // Tip filtresi
+      const typeMatch = !selectedType || selectedType === 'ALL' || res.type === selectedType;
+      
+      return statusMatch && typeMatch;
+    });
+  }, [selectedStatus, selectedType, reservations]);
+
+  // Aktif ve iptal edilmiş rezervasyon sayılarını hesapla
+  const activeReservations = useMemo(() => 
+    reservations.filter(r => r.status !== 'CANCELLED').length
+  , [reservations]);
+
+  const cancelledReservations = useMemo(() => 
+    reservations.filter(r => r.status === 'CANCELLED').length
+  , [reservations]);
+
+  useEffect(() => {
+    console.log('useEffect tetiklendi:', { selectedType, selectedStatus });
+    fetchReservations();
+  }, [selectedType, selectedStatus]);
 
   // Durum değiştirme modalını kapatma
   const handleCloseStatusModal = () => {
@@ -95,14 +155,12 @@ export default function ReservationsPage() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-[400px]">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-    </div>;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
   }
-
-  const filteredReservations = selectedStatus === 'ALL' 
-    ? reservations.filter(res => res.status !== 'CANCELLED')
-    : reservations.filter(res => res.status === 'CANCELLED');
 
   return (
     <div className="container mx-auto px-4 py-8">
