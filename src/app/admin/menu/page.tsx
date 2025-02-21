@@ -278,6 +278,7 @@ export default function MenuManagement() {
                         alt={item.name}
                         fill
                         className="object-cover rounded"
+                        unoptimized
                       />
                     </div>
                   </td>
