@@ -4,7 +4,8 @@ import GallerySection from '@/components/shared/GallerySection';
 import AtmosphereSection from '@/components/shared/AtmosphereSection';
 import Footer from '@/components/Footer';
 import HeaderMenu from '@/components/HeaderMenu';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+
 
 export default async function BarPage() {
   // Galeri resimlerini getir

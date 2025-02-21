@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import type { MenuItem } from '@/types/menu';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import { Switch } from "@/components/ui/switch";
+
 import { Button } from "@/components/ui/button";
-import { MenuType } from '@prisma/client';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 // Örnek menü öğeleri

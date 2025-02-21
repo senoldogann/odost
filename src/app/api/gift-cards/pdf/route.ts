@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+
 import { renderToBuffer } from '@react-pdf/renderer';
 import GiftCardPDF from '@/components/GiftCardPDF';
 import { GiftCard } from '@prisma/client';

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
+
 
 async function getRestaurantMetadata() {
   try {

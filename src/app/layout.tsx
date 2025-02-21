@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
+
 import Script from "next/script";
 import "./globals.css";
 import CookieConsent from '@/components/CookieConsent';

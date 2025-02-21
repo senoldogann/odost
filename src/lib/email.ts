@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
-import prisma from './prisma';
+import { prisma } from '@/lib/prisma';
+
 
 // E-posta göndermek için transporter oluştur
 const transporter = nodemailer.createTransport({

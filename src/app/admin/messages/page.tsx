@@ -2,7 +2,8 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import  prisma  from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
+
 import { Card, CardContent, Typography, Button, TextField, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useLanguage } from '@/context/LanguageContext';
 
