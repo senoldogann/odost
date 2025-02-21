@@ -11,6 +11,7 @@ export async function GET(request: Request) {
     const featured = searchParams.get('featured') === 'true'
 
     if (!type) {
+      console.error('Type parametresi eksik');
       return NextResponse.json({ error: 'Type parametresi gerekli' }, { status: 400 })
     }
 
@@ -28,7 +29,10 @@ export async function GET(request: Request) {
     return NextResponse.json(items)
   } catch (error) {
     console.error('Menu items getirme hatası:', error)
-    return NextResponse.json({ error: 'Menü öğeleri getirilemedi' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Menü öğeleri getirilemedi',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
@@ -36,28 +40,49 @@ export async function GET(request: Request) {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
+    console.log('Yeni menü öğesi ekleniyor:', data)
+    
     const newItem = await prisma.menuItem.create({
       data
     })
+    
+    console.log('Yeni menü öğesi eklendi:', newItem)
     return NextResponse.json(newItem)
   } catch (error) {
     console.error('Menu item oluşturma hatası:', error)
-    return NextResponse.json({ error: 'Menu item oluşturulamadı' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Menu item oluşturulamadı',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
 // PUT - Menü öğesini güncelle
 export async function PUT(request: NextRequest) {
   try {
-    const { id, ...data } = await request.json()
+    const data = await request.json()
+    console.log('Güncellenecek veri:', data)
+
+    if (!data.id) {
+      console.error('ID eksik')
+      return NextResponse.json({ error: 'ID gerekli' }, { status: 400 })
+    }
+
+    const { id, ...updateData } = data
+    
     const updatedItem = await prisma.menuItem.update({
       where: { id },
-      data
+      data: updateData
     })
+
+    console.log('Öğe güncellendi:', updatedItem)
     return NextResponse.json(updatedItem)
   } catch (error) {
     console.error('Menu item güncelleme hatası:', error)
-    return NextResponse.json({ error: 'Menu item güncellenemedi' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Menu item güncellenemedi',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
@@ -68,15 +93,21 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id')
 
     if (!id) {
+      console.error('ID parametresi eksik')
       return NextResponse.json({ error: 'ID parametresi gerekli' }, { status: 400 })
     }
 
     await prisma.menuItem.delete({
       where: { id }
     })
+    
+    console.log('Öğe silindi:', id)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Menu item silme hatası:', error)
-    return NextResponse.json({ error: 'Menu item silinemedi' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Menu item silinemedi',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 } 

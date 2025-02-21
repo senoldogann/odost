@@ -1,5 +1,16 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+// Global Prisma Client instance
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 const defaultSettings = {
   RAVINTOLA: {
@@ -119,22 +130,59 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const data = await request.json();
-    const { type, ...settings } = data;
+    const { type, id, createdAt, updatedAt, ...settings } = data;
 
-    if (!type) {
-      return NextResponse.json({ error: 'Type parameter is required' }, { status: 400 });
+    if (!type || !['RAVINTOLA', 'BAARI'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Virheellinen tyyppi. Tyypin on oltava RAVINTOLA tai BAARI.' },
+        { status: 400 }
+      );
     }
 
-    const updatedSettings = await prisma.siteSettings.upsert({
-      where: { type },
-      create: { type, ...settings },
-      update: settings
-    });
+    // Zorunlu alanları kontrol et
+    const requiredFields = ['title', 'description', 'keywords'];
+    const missingFields = requiredFields.filter(field => !settings[field]);
+    
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Puuttuvat kentät: ${missingFields.join(', ')}` },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(updatedSettings);
+    try {
+      // Önce bağlantıyı test et
+      await prisma.$connect();
+
+      const updatedSettings = await prisma.siteSettings.upsert({
+        where: { type },
+        create: { type, ...settings },
+        update: settings,
+      });
+
+      return NextResponse.json(updatedSettings);
+    } catch (dbError) {
+      console.error('Tietokantavirhe:', dbError);
+      
+      // Detaylı hata mesajı
+      let errorMessage = 'Tietokantaoperaatio epäonnistui';
+      if (dbError instanceof Error) {
+        errorMessage += `: ${dbError.message}`;
+      }
+      
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 500 }
+      );
+    } finally {
+      await prisma.$disconnect();
+    }
   } catch (error) {
-    console.error('Error updating site settings:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Sivustoasetusten päivitysvirhe:', error);
+    return NextResponse.json(
+      { error: 'Pyynnön käsittelyssä tapahtui virhe' },
+      { status: 500 }
+    );
   }
 }
 

@@ -218,6 +218,7 @@ export const fi = {
       title: 'Hero-osion hallinta',
       type: 'Tyyppi',
       addNewSection: 'Lisää uusi hero-osio',
+      add: 'Lisää uusi',
       currentSections: 'Nykyiset hero-osiot',
       sectionTitle: 'Otsikko',
       subtitle: 'Alaotsikko',

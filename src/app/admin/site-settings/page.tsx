@@ -63,11 +63,17 @@ export default function SiteSettingsPage() {
         body: JSON.stringify(settings),
       });
 
-      if (!response.ok) throw new Error('Asetusten päivittäminen epäonnistui');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Asetusten päivittäminen epäonnistui');
+      }
+
+      const data = await response.json();
+      setSettings(data);
       toast.success('Asetukset päivitetty onnistuneesti');
     } catch (error) {
       console.error('Asetusten päivitysvirhe:', error);
-      toast.error('Asetusten päivittäminen epäonnistui');
+      toast.error(error instanceof Error ? error.message : 'Asetusten päivittäminen epäonnistui');
     }
   };
 

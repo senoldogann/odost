@@ -209,6 +209,7 @@ export const tr = {
       title: 'Ana Bölüm Yönetimi',
       type: 'Tür',
       addNewSection: 'Yeni Ana Bölüm Ekle',
+      add: 'Yeni Ekle',
       currentSections: 'Mevcut Ana Bölümler',
       sectionTitle: 'Başlık',
       subtitle: 'Alt Başlık',
