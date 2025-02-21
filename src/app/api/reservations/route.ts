@@ -49,6 +49,26 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Gerekli alanları kontrol et
+    if (!body.userId || !body.date || !body.time || !body.guests || !body.type) {
+      return NextResponse.json(
+        { error: 'Kaikki pakolliset kentät on täytettävä' },
+        { status: 400 }
+      );
+    }
+
+    // Kullanıcıyı kontrol et
+    const user = await prisma.user.findUnique({
+      where: { id: body.userId }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Käyttäjää ei löydy' },
+        { status: 404 }
+      );
+    }
+
     // Rezervasyonu oluştur
     const reservation = await prisma.reservation.create({
       data: {
@@ -65,109 +85,114 @@ export async function POST(request: Request) {
       }
     });
 
-    // Müşteriye onay e-postası gönder
-    await transporter.sendMail({
-      from: `"${process.env.SITE_NAME}" <${process.env.EMAIL_USER}>`,
-      to: reservation.user.email,
-      subject: 'Varausvahvistus - ODOST',
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Pöytävaraus vastaanotettu</title>
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
-              
-              <h2 style="color: #1a1a1a;">Hei ${reservation.user.name},</h2>
-              
-              <p>Kiitos varauksestasi. Olemme vastaanottaneet pöytävarauksesi ja käsittelemme sen mahdollisimman pian.</p>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Päivämäärä:</strong> ${new Date(reservation.date).toLocaleDateString('fi-FI')}<br>
-                  <strong>Aika:</strong> ${reservation.time}<br>
-                  <strong>Henkilömäärä:</strong> ${reservation.guests}<br>
-                  <strong>Tyyppi:</strong> ${reservation.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
-                  <strong>Lisätiedot:</strong> ${reservation.notes || 'Ei lisätietoja'}
-                </p>
+    try {
+      // Müşteriye onay e-postası gönder
+      await transporter.sendMail({
+        from: `"${process.env.SITE_NAME}" <${process.env.EMAIL_USER}>`,
+        to: reservation.user.email,
+        subject: 'Varausvahvistus - ODOST',
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Pöytävaraus vastaanotettu</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
+                
+                <h2 style="color: #1a1a1a;">Hei ${reservation.user.name},</h2>
+                
+                <p>Kiitos varauksestasi. Olemme vastaanottaneet pöytävarauksesi ja käsittelemme sen mahdollisimman pian.</p>
+                
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                  <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
+                  <p style="margin: 0;">
+                    <strong>Päivämäärä:</strong> ${new Date(reservation.date).toLocaleDateString('fi-FI')}<br>
+                    <strong>Aika:</strong> ${reservation.time}<br>
+                    <strong>Henkilömäärä:</strong> ${reservation.guests}<br>
+                    <strong>Tyyppi:</strong> ${reservation.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
+                    <strong>Lisätiedot:</strong> ${reservation.notes || 'Ei lisätietoja'}
+                  </p>
+                </div>
+                
+                <p>Otamme sinuun yhteyttä pian varauksen vahvistamiseksi.</p>
+                
+                <div style="margin-top: 40px;">
+                  <p>Ystävällisin terveisin,<br>${process.env.SITE_TEAM_NAME}</p>
+                </div>
+                
+                <hr style="margin-top: 40px; border: none; border-top: 1px solid #eee;">
+                
+                <div style="margin-top: 20px; color: #666; font-size: 12px;">
+                  <p>Jos sinulla on kysyttävää tai haluat muuttaa varaustasi, ota yhteyttä meihin:</p>
+                  <p>${process.env.SITE_COMPANY_NAME}<br>
+                  ${process.env.SITE_ADDRESS}<br>
+                  Puh: ${process.env.SITE_PHONE}<br>
+                  Email: ${process.env.SITE_EMAIL}</p>
+                </div>
               </div>
-              
-              <p>Otamme sinuun yhteyttä pian varauksen vahvistamiseksi.</p>
-              
-              <div style="margin-top: 40px;">
-                <p>Ystävällisin terveisin,<br>${process.env.SITE_TEAM_NAME}</p>
-              </div>
-              
-              <hr style="margin-top: 40px; border: none; border-top: 1px solid #eee;">
-              
-              <div style="margin-top: 20px; color: #666; font-size: 12px;">
-                <p>Jos sinulla on kysyttävää tai haluat muuttaa varaustasi, ota yhteyttä meihin:</p>
-                <p>${process.env.SITE_COMPANY_NAME}<br>
-                ${process.env.SITE_ADDRESS}<br>
-                Puh: ${process.env.SITE_PHONE}<br>
-                Email: ${process.env.SITE_EMAIL}</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `
-    });
+            </body>
+          </html>
+        `
+      });
 
-    // Ravintolalle ilmoitus uudesta varauksesta
-    await transporter.sendMail({
-      from: `"${process.env.SITE_NAME}" <${process.env.EMAIL_USER}>`,
-      to: process.env.SITE_EMAIL,
-      subject: 'Uusi varaus - ODOST',
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Uusi varaus vastaanotettu</title>
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
-              
-              <h2 style="color: #1a1a1a;">Uusi varaus vastaanotettu</h2>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Asiakkaan tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Nimi:</strong> ${reservation.user.name}<br>
-                  <strong>Sähköposti:</strong> ${reservation.user.email}
-                </p>
+      // Ravintolaya ilmoitus
+      await transporter.sendMail({
+        from: `"${process.env.SITE_NAME}" <${process.env.EMAIL_USER}>`,
+        to: process.env.SITE_EMAIL,
+        subject: 'Uusi varaus - ODOST',
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Uusi varaus vastaanotettu</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
+                
+                <h2 style="color: #1a1a1a;">Uusi varaus vastaanotettu</h2>
+                
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                  <h3 style="margin-top: 0;">Asiakkaan tiedot:</h3>
+                  <p style="margin: 0;">
+                    <strong>Nimi:</strong> ${reservation.user.name}<br>
+                    <strong>Sähköposti:</strong> ${reservation.user.email}
+                  </p>
+                </div>
+                
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                  <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
+                  <p style="margin: 0;">
+                    <strong>Päivämäärä:</strong> ${new Date(reservation.date).toLocaleDateString('fi-FI')}<br>
+                    <strong>Aika:</strong> ${reservation.time}<br>
+                    <strong>Henkilömäärä:</strong> ${reservation.guests}<br>
+                    <strong>Tyyppi:</strong> ${reservation.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
+                    <strong>Lisätiedot:</strong> ${reservation.notes || 'Ei lisätietoja'}
+                  </p>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                  <p>Muista käsitellä varaus hallintapaneelissa.</p>
+                </div>
               </div>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Päivämäärä:</strong> ${new Date(reservation.date).toLocaleDateString('fi-FI')}<br>
-                  <strong>Aika:</strong> ${reservation.time}<br>
-                  <strong>Henkilömäärä:</strong> ${reservation.guests}<br>
-                  <strong>Tyyppi:</strong> ${reservation.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
-                  <strong>Lisätiedot:</strong> ${reservation.notes || 'Ei lisätietoja'}
-                </p>
-              </div>
-              
-              <div style="margin-top: 40px;">
-                <p>Muista käsitellä varaus hallintapaneelissa.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `
-    });
+            </body>
+          </html>
+        `
+      });
+    } catch (emailError) {
+      console.error('E-posta gönderme hatası:', emailError);
+      // E-posta hatası olsa bile rezervasyon başarılı sayılır
+    }
 
     return NextResponse.json(reservation);
   } catch (error) {
     console.error('Varausvirhe:', error);
     return NextResponse.json(
-      { error: 'Varauksen luominen epäonnistui' },
+      { error: 'Varauksen luominen epäonnistui. Yritä myöhemmin uudelleen.' },
       { status: 500 }
     );
   }

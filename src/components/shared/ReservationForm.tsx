@@ -37,7 +37,8 @@ export default function ReservationForm() {
       });
 
       if (!userResponse.ok) {
-        throw new Error('Käyttäjän luominen epäonnistui');
+        const errorData = await userResponse.json();
+        throw new Error(errorData.error || 'Käyttäjän luominen epäonnistui');
       }
 
       const userData = await userResponse.json();
@@ -55,14 +56,20 @@ export default function ReservationForm() {
           guests: parseInt(formData.guests),
           type: formData.type,
           notes: formData.notes,
+          phone: formData.phone, // Telefon numarasını da ekleyelim
         }),
       });
 
       if (!reservationResponse.ok) {
-        throw new Error('Varauksen luominen epäonnistui');
+        const errorData = await reservationResponse.json();
+        console.error('Reservation error details:', errorData);
+        throw new Error(errorData.error || 'Varauksen luominen epäonnistui');
       }
 
-      toast.success('Varaus onnistui!');
+      const reservationData = await reservationResponse.json();
+      console.log('Reservation created:', reservationData);
+
+      toast.success('Varaus onnistui! Saat vahvistuksen sähköpostiisi.');
       
       // Formu sıfırla
       setFormData({
@@ -77,7 +84,7 @@ export default function ReservationForm() {
       });
     } catch (error) {
       console.error('Varausvirhe:', error);
-      toast.error('Varaus epäonnistui. Yritä uudelleen.');
+      toast.error(error instanceof Error ? error.message : 'Varaus epäonnistui. Yritä uudelleen.');
     } finally {
       setIsSubmitting(false);
     }
