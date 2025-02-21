@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import nodemailer from 'nodemailer';
-
-const prisma = new PrismaClient();
 
 // E-posta gönderimi için transporter oluştur
 const transporter = nodemailer.createTransport({
