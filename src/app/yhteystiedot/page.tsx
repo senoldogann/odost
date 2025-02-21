@@ -28,7 +28,7 @@ export default function YhteystiedotPage() {
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b dark:from-purple-900/20 to-transparent pointer-events-none"></div>
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-8 text-theme">Ota yhteyttä</h2>
+            <h2 className="text-3xl font-bold text-center mb-8 text-theme">Ota yhteyttä </h2>
             <div className="bg-theme border border-theme p-8 rounded-lg">
               <ContactForm type="YLEINEN" />
             </div>
