@@ -214,7 +214,7 @@ export default function MenuPage() {
               </div>
               <div className="relative h-44 sm:h-48 w-full overflow-hidden">
                 <Image
-                  src={item.image || '/images/placeholder.jpg'}
+                  src={item.image ? item.image : '/images/placeholder.jpg'}
                   alt={item.name}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"

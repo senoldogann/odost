@@ -274,7 +274,7 @@ export default function MenuManagement() {
                   <td className="px-2 py-2">
                     <div className="relative h-12 w-12">
                       <Image
-                        src={item.image || '/placeholder.png'}
+                        src={item.image ? item.image : '/placeholder.png'}
                         alt={item.name}
                         fill
                         className="object-cover rounded"

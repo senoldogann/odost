@@ -70,14 +70,10 @@ export async function POST(request: Request) {
     // Dosyanın public URL'ini al
     const { data: { publicUrl } } = supabase.storage
       .from('menu-images')
-      .getPublicUrl(uniqueFilename);
-
-    // CDN URL'ini oluştur
-    const cdnUrl = `${process.env.NEXT_PUBLIC_STORAGE_URL}${uniqueFilename}`;
+      .getPublicUrl(data.path);
 
     return NextResponse.json({
-      url: cdnUrl,
-      publicUrl: publicUrl,
+      url: publicUrl,
       message: 'Tiedosto ladattu onnistuneesti'
     });
   } catch (error) {
