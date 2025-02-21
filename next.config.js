@@ -34,9 +34,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000', 'odostlounas.vercel.app']
-    }
+    serverActions: true
   },
   poweredByHeader: false,
   reactStrictMode: true,
