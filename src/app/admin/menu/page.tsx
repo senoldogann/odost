@@ -67,15 +67,21 @@ export default function MenuManagement() {
           body: formData
         });
 
-        if (!response.ok) throw new Error('Kuvan lataaminen epäonnistui');
-
         const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Kuvan lataaminen epäonnistui');
+        }
+
         if (editItem) {
           setEditItem({ ...editItem, image: data.url });
+        } else {
+          setNewItem({ ...newItem, image: data.url });
         }
         toast.success('Kuva ladattu onnistuneesti');
       } catch (error) {
-        toast.error('Kuvan lataaminen epäonnistui');
+        console.error('Kuvan latausvirhe:', error);
+        toast.error(error instanceof Error ? error.message : 'Kuvan lataaminen epäonnistui');
       } finally {
         setUploadingImage(false);
       }

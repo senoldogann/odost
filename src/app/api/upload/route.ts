@@ -42,6 +42,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // Dosyayı buffer'a dönüştür
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     // Dosya adını benzersiz yap ve güvenli hale getir
     const timestamp = Date.now();
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -50,36 +54,54 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-');
     const uniqueFilename = `${timestamp}-${safeName}`;
-    
-    // Dosyayı Supabase'e yükle
-    const { data, error } = await supabase.storage
-      .from('menu-images')
-      .upload(uniqueFilename, file, {
-        cacheControl: '3600',
-        upsert: false
+
+    try {
+      // Dosyayı Supabase'e yükle
+      const { data, error: uploadError } = await supabase.storage
+        .from('menu-images')
+        .upload(uniqueFilename, buffer, {
+          contentType: file.type,
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Supabase yükleme hatası:', uploadError);
+        return NextResponse.json(
+          { error: 'Virhe tiedoston lataamisessa: ' + uploadError.message },
+          { status: 500 }
+        );
+      }
+
+      if (!data?.path) {
+        return NextResponse.json(
+          { error: 'Tiedoston polkua ei voitu luoda' },
+          { status: 500 }
+        );
+      }
+
+      // Public URL'i al
+      const { data: { publicUrl } } = supabase.storage
+        .from('menu-images')
+        .getPublicUrl(data.path);
+
+      return NextResponse.json({
+        url: publicUrl,
+        message: 'Tiedosto ladattu onnistuneesti'
       });
 
-    if (error) {
-      console.error('Supabase yükleme hatası:', error);
+    } catch (uploadError) {
+      console.error('Supabase işlem hatası:', uploadError);
       return NextResponse.json(
-        { error: 'Virhe tiedoston lataamisessa: ' + error.message },
+        { error: 'Virhe Supabase-toiminnossa' },
         { status: 500 }
       );
     }
 
-    // Dosyanın public URL'ini al
-    const { data: { publicUrl } } = supabase.storage
-      .from('menu-images')
-      .getPublicUrl(data.path);
-
-    return NextResponse.json({
-      url: publicUrl,
-      message: 'Tiedosto ladattu onnistuneesti'
-    });
   } catch (error) {
-    console.error('Virhe tiedoston lataamisessa:', error);
+    console.error('Yleinen hata:', error);
     return NextResponse.json(
-      { error: 'Virhe tiedoston lataamisessa. Yritä uudelleen.' },
+      { error: 'Odottamaton virhe. Yritä uudelleen.' },
       { status: 500 }
     );
   }
