@@ -2,18 +2,39 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 // E-posta gönderici yapılandırması
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+async function createTransporter() {
+  try {
+    console.log('Creating email transporter with settings:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER ? '***' : 'undefined',
+      pass: process.env.EMAIL_PASSWORD ? '***' : 'undefined'
+    });
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // Test bağlantıyı
+    await transporter.verify();
+    console.log('Email transporter verified successfully');
+    return transporter;
+  } catch (error) {
+    console.error('Email transporter creation failed:', error);
+    throw error;
+  }
+}
 
 export async function POST(request: Request) {
   try {
+    console.log('Failed login notification received');
+    
     const body = await request.json();
     const { 
       ip, 
@@ -21,8 +42,18 @@ export async function POST(request: Request) {
       email, 
       userAgent, 
       timestamp,
-      geoLocation 
+      geoLocation,
+      error 
     } = body;
+
+    console.log('Creating email transporter...');
+    const transporter = await createTransporter();
+
+    console.log('Preparing to send email with data:', {
+      to: process.env.SITE_EMAIL,
+      from: process.env.EMAIL_USER,
+      subject: '⚠️ Epäonnistunut kirjautumisyritys - ODOST'
+    });
 
     // E-posta içeriği
     const mailOptions = {
@@ -36,6 +67,7 @@ export async function POST(request: Request) {
         <p><strong>Arvioitu sijainti:</strong> ${location}</p>
         <p><strong>Yritetty sähköposti:</strong> ${email}</p>
         <p><strong>Selaintiedot:</strong> ${userAgent}</p>
+        ${error ? `<p><strong>Virhe:</strong> ${error}</p>` : ''}
         ${geoLocation ? `
         <p><strong>Tarkka sijaintitiedot:</strong></p>
         <ul>
@@ -50,12 +82,18 @@ export async function POST(request: Request) {
       `,
     };
 
-    // E-postayı gönder
-    await transporter.sendMail(mailOptions);
+    console.log('Sending email...');
 
-    return NextResponse.json({ success: true });
+    // E-postayı gönder
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', info.messageId);
+
+    return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (error) {
-    console.error('Kirjautumisvaroituksen lähetys epäonnistui:', error);
-    return NextResponse.json({ error: 'Ilmoituksen lähetys epäonnistui' }, { status: 500 });
+    console.error('Failed login notification error:', error);
+    return NextResponse.json({ 
+      error: 'Ilmoituksen lähetys epäonnistui',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 } 

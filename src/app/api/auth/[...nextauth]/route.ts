@@ -7,7 +7,9 @@ import bcrypt from 'bcryptjs';
 // Başarısız giriş denemelerini bildirmek için fonksiyon
 async function notifyFailedLogin(email: string, error: string) {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/failed-login`, {
+    console.log('Sending failed login notification');
+
+    const response = await fetch('/api/auth/failed-login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -23,7 +25,10 @@ async function notifyFailedLogin(email: string, error: string) {
     });
 
     if (!response.ok) {
-      console.error('Failed login notification error:', await response.text());
+      console.error('Failed login notification error. Status:', response.status);
+      console.error('Error details:', await response.text());
+    } else {
+      console.log('Failed login notification sent successfully');
     }
   } catch (error) {
     console.error('Failed login notification error:', error);
