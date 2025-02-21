@@ -67,21 +67,15 @@ export default function MenuManagement() {
           body: formData
         });
 
+        if (!response.ok) throw new Error('Kuvan lataaminen epäonnistui');
+
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Kuvan lataaminen epäonnistui');
-        }
-
         if (editItem) {
           setEditItem({ ...editItem, image: data.url });
-        } else {
-          setNewItem({ ...newItem, image: data.url });
         }
         toast.success('Kuva ladattu onnistuneesti');
       } catch (error) {
-        console.error('Kuvan latausvirhe:', error);
-        toast.error(error instanceof Error ? error.message : 'Kuvan lataaminen epäonnistui');
+        toast.error('Kuvan lataaminen epäonnistui');
       } finally {
         setUploadingImage(false);
       }
@@ -280,7 +274,7 @@ export default function MenuManagement() {
                   <td className="px-2 py-2">
                     <div className="relative h-12 w-12">
                       <Image
-                        src={item.image ? item.image : '/placeholder.png'}
+                        src={item.image || '/placeholder.png'}
                         alt={item.name}
                         fill
                         className="object-cover rounded"
