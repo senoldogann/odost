@@ -56,6 +56,7 @@ model Reservation {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   userId      String    @db.ObjectId
   user        User      @relation(fields: [userId], references: [id])
+  name        String    // Rezervasyon yapan kişinin adı
   date        DateTime
   time        String
   guests      Int

@@ -9,9 +9,10 @@ import { useLanguage } from '@/context/LanguageContext';
 interface Reservation {
   id: string;
   user: {
-    name: string;
     email: string;
+    name: string | null;
   };
+  name: string;
   date: string;
   time: string;
   guests: number;
@@ -23,78 +24,51 @@ interface Reservation {
 export default function ReservationsPage() {
   const { t } = useLanguage();
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [selectedType, setSelectedType] = useState<'RAVINTOLA' | 'BAARI' | 'ALL'>('ALL');
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedNote, setSelectedNote] = useState<{ note: string; customerName: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<'ALL' | 'CANCELLED'>('ALL');
+  const [selectedType, setSelectedType] = useState<'ALL' | 'RAVINTOLA' | 'BAARI'>('ALL');
+  const [selectedNote, setSelectedNote] = useState<{ note: string; name: string } | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<string | null>(null);
 
-  // Rezervasyonları getir
   const fetchReservations = async () => {
     try {
-      setIsLoading(true);
-      console.log('Fetching reservations:', { selectedType, selectedStatus });
-
-      // Query parametrelerini oluştur
-      const queryParams = new URLSearchParams();
-      if (selectedType && selectedType !== 'ALL') {
-        queryParams.append('type', selectedType);
-      }
-      if (selectedStatus && selectedStatus !== 'ALL') {
-        queryParams.append('status', selectedStatus);
-      }
-
-      const url = `/api/reservations${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-      console.log('Fetch URL:', url);
-
-      const response = await fetch(url);
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/reservations?type=${selectedType}&status=${selectedStatus}`);
       
       if (!response.ok) {
-        console.error('API yanıt hatası:', response.status, response.statusText);
         const errorData = await response.json();
-        console.error('API hata detayı:', errorData);
-        throw new Error(t('admin.common.error'));
+        throw new Error(errorData.error || 'Virhe tapahtui');
       }
-      
-      const data = await response.json();
-      console.log('API yanıtı:', data);
 
-      if (Array.isArray(data)) {
-        const formattedReservations = data.map(reservation => ({
-          ...reservation,
-          date: new Date(reservation.date).toISOString()
-        }));
-        console.log('Formatlanmış rezervasyonlar:', formattedReservations);
-        setReservations(formattedReservations);
-      } else {
-        console.error('API yanıtı dizi değil:', data);
-        throw new Error('Geçersiz API yanıtı');
-      }
+      const data = await response.json();
+      setReservations(data);
     } catch (error) {
       console.error('Rezervasyon getirme hatası:', error);
-      toast.error(t('admin.common.error'));
+      setError(error instanceof Error ? error.message : 'Virhe tapahtui');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Filtreleme mantığını güncelle
-  const filteredReservations = useMemo(() => {
-    console.log('Filtreleme başlıyor:', { selectedStatus, selectedType, totalReservations: reservations.length });
-    
-    return reservations.filter(res => {
-      // Durum filtresi
-      const statusMatch = selectedStatus === 'ALL' 
-        ? res.status !== 'CANCELLED' // ALL seçiliyse sadece iptal edilmemiş rezervasyonları göster
-        : res.status === selectedStatus;
+  useEffect(() => {
+    fetchReservations();
+  }, [selectedStatus, selectedType]);
 
-      // Tip filtresi
-      const typeMatch = !selectedType || selectedType === 'ALL' || res.type === selectedType;
-      
-      return statusMatch && typeMatch;
+  // Filtrelenmiş rezervasyonlar
+  const filteredReservations = useMemo(() => {
+    return reservations.filter(reservation => {
+      if (selectedStatus === 'ALL') {
+        return reservation.status !== 'CANCELLED';
+      } else if (selectedStatus === 'CANCELLED') {
+        return reservation.status === 'CANCELLED';
+      }
+      return true;
     });
-  }, [selectedStatus, selectedType, reservations]);
+  }, [reservations, selectedStatus]);
 
   // Aktif ve iptal edilmiş rezervasyon sayılarını hesapla
   const activeReservations = useMemo(() => 
@@ -105,10 +79,23 @@ export default function ReservationsPage() {
     reservations.filter(r => r.status === 'CANCELLED').length
   , [reservations]);
 
-  useEffect(() => {
-    console.log('useEffect tetiklendi:', { selectedType, selectedStatus });
-    fetchReservations();
-  }, [selectedType, selectedStatus]);
+  if (loading) {
+    return <div>Ladataan...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500">
+        <p>Virhe: {error}</p>
+        <button 
+          onClick={fetchReservations}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Yritä uudelleen
+        </button>
+      </div>
+    );
+  }
 
   // Durum değiştirme modalını kapatma
   const handleCloseStatusModal = () => {
@@ -153,14 +140,6 @@ export default function ReservationsPage() {
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'dd.MM.yyyy');
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -212,7 +191,7 @@ export default function ReservationsPage() {
                 <tr key={reservation.id} className={`border-t border-white/10 hover:bg-white/5 ${
                   index % 2 === 0 ? '' : 'bg-white/5'
                 }`}>
-                  <td className="px-3 py-2">{reservation.user.name}</td>
+                  <td className="px-3 py-2">{reservation.name}</td>
                   <td className="px-3 py-2">{reservation.user.email}</td>
                   <td className="px-3 py-2">{formatDate(reservation.date)}</td>
                   <td className="px-3 py-2">{reservation.time}</td>
@@ -228,7 +207,7 @@ export default function ReservationsPage() {
                       <button
                         onClick={() => setSelectedNote({
                           note: reservation.notes || '',
-                          customerName: reservation.user.name
+                          name: reservation.name
                         })}
                         className="text-blue-400 hover:text-blue-300 text-sm"
                       >
@@ -276,7 +255,7 @@ export default function ReservationsPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-xl font-semibold mb-1 text-white">{t('admin.reservations.customerNotes')}</h3>
-                <p className="text-gray-400">{selectedNote.customerName}</p>
+                <p className="text-gray-400">{selectedNote.name}</p>
               </div>
               <button 
                 onClick={() => setSelectedNote(null)}

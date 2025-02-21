@@ -23,9 +23,6 @@ export async function GET(request: Request) {
     const type = searchParams.get('type');
     const status = searchParams.get('status');
 
-    console.log('API çağrısı alındı:', { type, status });
-
-    // Filtreleme kriterlerini oluştur
     const where: any = {};
     
     // Tip filtresi
@@ -34,32 +31,35 @@ export async function GET(request: Request) {
     }
     
     // Durum filtresi
-    if (status && status !== 'ALL') {
-      where.status = status;
+    if (status === 'CANCELLED') {
+      where.status = 'CANCELLED';
+    } else if (status === 'ALL') {
+      where.status = { not: 'CANCELLED' };
     }
 
-    console.log('Filtreleme kriterleri:', where);
-
-    // Rezervasyonları getir
+    // Tüm rezervasyonları getir
     const reservations = await prisma.reservation.findMany({
       where,
       include: {
         user: {
           select: {
-            name: true,
-            email: true
+            email: true,
+            name: true
           }
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        date: 'desc'
       }
     });
 
-    console.log('Bulunan rezervasyon sayısı:', reservations.length);
-    
-    // NextResponse kullan
-    return NextResponse.json(reservations);
+    // Rezervasyonları işle ve name alanı olmayanlar için user.name'i kullan
+    const processedReservations = reservations.map(reservation => ({
+      ...reservation,
+      name: reservation.name || reservation.user.name || reservation.user.email.split('@')[0]
+    }));
+
+    return NextResponse.json(processedReservations);
   } catch (error) {
     console.error('Rezervasyon getirme hatası:', error);
     return NextResponse.json(
@@ -86,68 +86,52 @@ export async function POST(request: Request) {
     const recaptchaData = await recaptchaVerification.json();
 
     if (!recaptchaData.success) {
-      console.error('reCAPTCHA verification failed:', recaptchaData);
-      return new Response(
-        JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Kullanıcı kontrolü
+    // Kullanıcıyı e-posta ile bul veya oluştur
     let user = await prisma.user.findUnique({
       where: { email: body.email }
     });
 
     if (!user) {
       // Yeni kullanıcı oluştur
-      const tempPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
+      const hashedPassword = await bcrypt.hash('temporary', 10);
       user = await prisma.user.create({
         data: {
-          name: body.name,
+          name: body.name, // İlk rezervasyonda gelen ismi kullan
           email: body.email,
-          password: hashedPassword
+          password: hashedPassword,
+          role: 'USER'
         }
-      });
-    } else {
-      // Mevcut kullanıcının adını güncelle
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { name: body.name }
       });
     }
 
-    console.log('Kullanıcı bilgileri:', { userId: user.id, name: user.name, email: user.email });
-
-    // Rezervasyon oluştur
+    // Rezervasyonu oluştur
     const reservation = await prisma.reservation.create({
       data: {
         userId: user.id,
+        name: body.name,
         date: new Date(body.date),
         time: body.time,
         guests: body.guests,
         type: body.type,
-        notes: body.notes || '',
+        notes: body.notes,
         status: 'PENDING'
       },
       include: {
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
+        user: true
       }
     });
-
-    console.log('Oluşturulan rezervasyon:', reservation);
 
     // E-posta gönder
     await sendEmail({
       to: body.email,
       subject: 'Varauksesi on vastaanotettu - ODOST',
-      text: `Kiitos varauksestasi!\n\nVarauksen tiedot:\nPäivämäärä: ${format(new Date(body.date), 'dd.MM.yyyy')}\nAika: ${body.time}\nHenkilömäärä: ${body.guests}\n\nOtamme sinuun yhteyttä pian varauksen vahvistamiseksi.\n\nYstävällisin terveisin,\nODOST Tiimi`,
+      text: `Kiitos varauksestasi ${reservation.name}!\n\nVarauksen tiedot:\nPäivämäärä: ${format(new Date(body.date), 'dd.MM.yyyy')}\nAika: ${body.time}\nHenkilömäärä: ${body.guests}\n\nOtamme sinuun yhteyttä pian varauksen vahvistamiseksi.\n\nYstävällisin terveisin,\nODOST Tiimi`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -157,7 +141,7 @@ export async function POST(request: Request) {
           </head>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #1a1a1a;">Kiitos varauksestasi!</h2>
+              <h2 style="color: #1a1a1a;">Kiitos varauksestasi, ${reservation.name}!</h2>
               
               <p>Olemme vastaanottaneet varauksesi ja käsittelemme sen pian.</p>
               
@@ -327,16 +311,24 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ error: 'ID vaaditaan' }, { status: 400 });
+    const deleteAll = searchParams.get('deleteAll');
+
+    if (deleteAll === 'true') {
+      // Tüm rezervasyonları sil
+      await prisma.reservation.deleteMany({});
+      return NextResponse.json({ success: true, message: 'Kaikki varaukset poistettu' });
+    } else {
+      const id = searchParams.get('id');
+      if (!id) {
+        return NextResponse.json({ error: 'ID vaaditaan' }, { status: 400 });
+      }
+      await prisma.reservation.delete({
+        where: { id }
+      });
+      return NextResponse.json({ success: true });
     }
-    await prisma.reservation.update({
-      where: { id },
-      data: { status: 'CANCELLED' }
-    });
-    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Varausta ei voitu peruuttaa.' }, { status: 500 });
+    console.error('Varausten poistamisvirhe:', error);
+    return NextResponse.json({ error: 'Varauksia ei voitu poistaa' }, { status: 500 });
   }
 } 
