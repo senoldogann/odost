@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma db push && prisma generate && next build",
+    "build": "NEXTAUTH_URL=https://odostlounas.vercel.app prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-switch": "^1.1.3",
     "@react-pdf/renderer": "^4.2.2",
+    "@supabase/supabase-js": "^2.48.1",
     "@tanstack/react-query": "^5.66.7",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^6.4.17",

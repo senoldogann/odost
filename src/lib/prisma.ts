@@ -6,12 +6,12 @@ declare global {
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    log: ['query'],
+    log: ['error', 'warn'],
     datasources: {
       db: {
-        url: process.env.NODE_ENV === 'production' 
-          ? process.env.DATABASE_URL 
-          : process.env.DIRECT_URL
+        url: process.env.NODE_ENV === 'production'
+          ? process.env.DATABASE_URL // Transaction mode için pooler URL (port 6543)
+          : process.env.DIRECT_URL   // Session mode için direct URL (port 5432)
       }
     }
   })
