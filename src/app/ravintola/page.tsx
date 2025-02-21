@@ -1,19 +1,33 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import MenuSection from '@/components/shared/MenuSection';
 import GallerySection from '@/components/shared/GallerySection';
 import AtmosphereSection from '@/components/shared/AtmosphereSection';
 import Footer from '@/components/Footer';
 import HeaderMenu from '@/components/HeaderMenu';
-import { prisma } from '@/lib/prisma';
 
-export default async function RestaurantPage() {
-  // Galeri resimlerini getir
-  const galleryImages = await prisma.gallery.findMany({
-    where: {
-      type: 'RAVINTOLA',
-      isActive: true
-    }
-  });
+export default function RestaurantPage() {
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      try {
+        const response = await fetch('/api/gallery?type=RAVINTOLA');
+        if (!response.ok) throw new Error('Gallerian hakeminen epäonnistui');
+        const data = await response.json();
+        setGalleryImages(data);
+      } catch (error) {
+        console.error('Gallerian hakuvirhe:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGalleryImages();
+  }, []);
 
   return (
     <div className="min-h-screen bg-theme">
@@ -40,7 +54,7 @@ export default async function RestaurantPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-theme">Galleria</h2>
-          <GallerySection type="RAVINTOLA" images={galleryImages} />
+          {!isLoading && <GallerySection type="RAVINTOLA" images={galleryImages} />}
         </div>
       </section>
 

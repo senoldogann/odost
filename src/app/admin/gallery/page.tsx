@@ -81,6 +81,17 @@ export default function GalleryManagement() {
 
       if (!response.ok) throw new Error(editingId ? 'Päivitys epäonnistui' : 'Lisäys epäonnistui');
 
+      const updatedItem = await response.json();
+
+      // State'i güncelle
+      if (editingId) {
+        setItems(prevItems => prevItems.map(item => 
+          item.id === editingId ? updatedItem : item
+        ));
+      } else {
+        setItems(prevItems => [...prevItems, updatedItem]);
+      }
+
       toast.success(editingId ? 'Kuva päivitetty onnistuneesti' : 'Kuva lisätty onnistuneesti');
       setNewItem({
         title: '',
@@ -90,7 +101,6 @@ export default function GalleryManagement() {
         isActive: true
       });
       setEditingId(null);
-      fetchGalleryItems();
     } catch (error) {
       console.error('Virhe:', error);
       toast.error(editingId ? 'Päivitys epäonnistui' : 'Lisäys epäonnistui');
@@ -107,8 +117,9 @@ export default function GalleryManagement() {
 
       if (!response.ok) throw new Error('Poisto epäonnistui');
 
+      // State'den silinen öğeyi kaldır
+      setItems(prevItems => prevItems.filter(item => item.id !== id));
       toast.success('Kuva poistettu onnistuneesti');
-      fetchGalleryItems();
     } catch (error) {
       console.error('Poistovirhe:', error);
       toast.error('Poisto epäonnistui');
