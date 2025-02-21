@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { format } from 'date-fns';
 import { sendEmail } from '@/lib/email';
 
@@ -64,22 +64,24 @@ export async function POST(request: Request) {
     const recaptchaData = await recaptchaVerification.json();
 
     if (!recaptchaData.success) {
-      return new Response(JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      console.error('reCAPTCHA verification failed:', recaptchaData);
+      return new Response(
+        JSON.stringify({ error: 'reCAPTCHA doğrulama başarısız' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Önce kullanıcıyı kontrol et veya oluştur
+    // Kullanıcı kontrolü
     let user = await prisma.user.findUnique({
       where: { email: body.email }
     });
 
     if (!user) {
-      // Kullanıcı yoksa yeni kullanıcı oluştur
+      // Geçici şifre oluştur
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
-      
+
+      // Yeni kullanıcı oluştur
       user = await prisma.user.create({
         data: {
           name: body.name,
@@ -97,8 +99,8 @@ export async function POST(request: Request) {
         time: body.time,
         guests: body.guests,
         type: body.type,
-        status: 'PENDING',
-        notes: body.notes
+        notes: body.notes || '',
+        status: 'PENDING'
       }
     });
 
@@ -106,47 +108,32 @@ export async function POST(request: Request) {
     await sendEmail({
       to: body.email,
       subject: 'Varauksesi on vastaanotettu - ODOST',
-      text: `Hei ${body.name},\n\nKiitos varauksestasi. Olemme vastaanottaneet pöytävarauksesi ja käsittelemme sen mahdollisimman pian.\n\nVarauksen tiedot:\nPäivämäärä: ${format(new Date(body.date), 'dd.MM.yyyy')}\nAika: ${body.time}\nHenkilömäärä: ${body.guests}\n\nOtamme sinuun yhteyttä pian.\n\nYstävällisin terveisin,\nODOST Tiimi`,
+      text: `Kiitos varauksestasi!\n\nVarauksen tiedot:\nPäivämäärä: ${format(new Date(body.date), 'dd.MM.yyyy')}\nAika: ${body.time}\nHenkilömäärä: ${body.guests}\n\nOtamme sinuun yhteyttä pian varauksen vahvistamiseksi.\n\nYstävällisin terveisin,\nODOST Tiimi`,
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
-            <title>Pöytävaraus vastaanotettu</title>
+            <title>Varausvahvistus</title>
           </head>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
+              <h2 style="color: #1a1a1a;">Kiitos varauksestasi!</h2>
               
-              <h2 style="color: #1a1a1a;">Hei ${body.name},</h2>
+              <p>Olemme vastaanottaneet varauksesi ja käsittelemme sen pian.</p>
               
-              <p>Kiitos varauksestasi. Olemme vastaanottaneet pöytävarauksesi ja käsittelemme sen mahdollisimman pian.</p>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Päivämäärä:</strong> ${format(new Date(body.date), 'dd.MM.yyyy')}<br>
-                  <strong>Aika:</strong> ${body.time}<br>
-                  <strong>Henkilömäärä:</strong> ${body.guests}<br>
-                  <strong>Tyyppi:</strong> ${body.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
-                  <strong>Lisätiedot:</strong> ${body.notes || 'Ei lisätietoja'}
-                </p>
-              </div>
+              <h3 style="color: #1a1a1a;">Varauksen tiedot:</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li><strong>Päivämäärä:</strong> ${format(new Date(body.date), 'dd.MM.yyyy')}</li>
+                <li><strong>Aika:</strong> ${body.time}</li>
+                <li><strong>Henkilömäärä:</strong> ${body.guests}</li>
+                ${body.notes ? `<li><strong>Lisätiedot:</strong> ${body.notes}</li>` : ''}
+              </ul>
               
               <p>Otamme sinuun yhteyttä pian varauksen vahvistamiseksi.</p>
               
               <div style="margin-top: 40px;">
-                <p>Ystävällisin terveisin,<br>${process.env.SITE_TEAM_NAME}</p>
-              </div>
-              
-              <hr style="margin-top: 40px; border: none; border-top: 1px solid #eee;">
-              
-              <div style="margin-top: 20px; color: #666; font-size: 12px;">
-                <p>Jos sinulla on kysyttävää tai haluat muuttaa varaustasi, ota yhteyttä meihin:</p>
-                <p>${process.env.SITE_COMPANY_NAME}<br>
-                ${process.env.SITE_ADDRESS}<br>
-                Puh: ${process.env.SITE_PHONE}<br>
-                Email: ${process.env.SITE_EMAIL}</p>
+                <p>Ystävällisin terveisin,<br>ODOST Tiimi</p>
               </div>
             </div>
           </body>
@@ -154,59 +141,16 @@ export async function POST(request: Request) {
       `
     });
 
-    // Ravintolaya ilmoitus
-    await sendEmail({
-      to: process.env.SITE_EMAIL || '',
-      subject: 'Uusi varaus - ODOST',
-      text: `Uusi varaus vastaanotettu\n\nAsiakkaan tiedot:\nNimi: ${body.name}\nSähköposti: ${body.email}\n\nVarauksen tiedot:\nPäivämäärä: ${format(new Date(body.date), 'dd.MM.yyyy')}\nAika: ${body.time}\nHenkilömäärä: ${body.guests}\nTyyppi: ${body.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}\nLisätiedot: ${body.notes || 'Ei lisätietoja'}\n\nMuista käsitellä varaus hallintapaneelissa.`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Uusi varaus vastaanotettu</title>
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <img src="${process.env.SITE_LOGO_URL}" alt="${process.env.SITE_NAME}" style="max-width: 200px; margin-bottom: 20px;">
-              
-              <h2 style="color: #1a1a1a;">Uusi varaus vastaanotettu</h2>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Asiakkaan tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Nimi:</strong> ${body.name}<br>
-                  <strong>Sähköposti:</strong> ${body.email}<br>
-                  <strong>Puhelin:</strong> ${body.phone}
-                </p>
-              </div>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Varauksen tiedot:</h3>
-                <p style="margin: 0;">
-                  <strong>Päivämäärä:</strong> ${format(new Date(body.date), 'dd.MM.yyyy')}<br>
-                  <strong>Aika:</strong> ${body.time}<br>
-                  <strong>Henkilömäärä:</strong> ${body.guests}<br>
-                  <strong>Tyyppi:</strong> ${body.type === 'RAVINTOLA' ? 'Ravintola' : 'Baari'}<br>
-                  <strong>Lisätiedot:</strong> ${body.notes || 'Ei lisätietoja'}
-                </p>
-              </div>
-              
-              <div style="margin-top: 40px;">
-                <p>Muista käsitellä varaus hallintapaneelissa.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `
+    return new Response(JSON.stringify(reservation), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
     });
 
-    return NextResponse.json(reservation);
   } catch (error) {
-    console.error('Rezervasyon oluşturma hatası:', error);
-    return NextResponse.json(
-      { error: 'Varauksen luominen epäonnistui' },
-      { status: 500 }
+    console.error('Varausvirhe:', error);
+    return new Response(
+      JSON.stringify({ error: 'Varauksen luominen epäonnistui' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

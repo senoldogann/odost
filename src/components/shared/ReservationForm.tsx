@@ -31,7 +31,6 @@ export default function ReservationForm() {
     setIsSubmitting(true);
 
     try {
-      // Direkt rezervasyon oluştur
       const reservationResponse = await fetch('/api/reservations', {
         method: 'POST',
         headers: {
@@ -45,14 +44,19 @@ export default function ReservationForm() {
         }),
       });
 
-      if (!reservationResponse.ok) {
-        const errorData = await reservationResponse.json();
-        console.error('Reservation error details:', errorData);
-        throw new Error(errorData.error || 'Varauksen luominen epäonnistui');
-      }
+      const responseData = await reservationResponse.json();
 
-      const reservationData = await reservationResponse.json();
-      console.log('Reservation created:', reservationData);
+      if (!reservationResponse.ok) {
+        if (responseData.error === 'reCAPTCHA doğrulama başarısız') {
+          // ReCAPTCHA'yı sıfırla ve yeni token al
+          if (window.grecaptcha) {
+            window.grecaptcha.reset();
+          }
+          setRecaptchaValue(null);
+          throw new Error('reCAPTCHA doğrulama başarısız. Lütfen tekrar deneyin.');
+        }
+        throw new Error(responseData.error || 'Varauksen luominen epäonnistui');
+      }
 
       toast.success('Varaus onnistui! Saat vahvistuksen sähköpostiisi.');
       
@@ -68,7 +72,7 @@ export default function ReservationForm() {
         notes: ''
       });
       setRecaptchaValue(null);
-
+      
       if (window.grecaptcha) {
         window.grecaptcha.reset();
       }
@@ -243,10 +247,12 @@ export default function ReservationForm() {
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
             onChange={handleRecaptchaChange}
             theme="light"
-            className="dark:[&>div]:!bg-black dark:[&>div]:border-0 dark:[&>div>div>iframe]:border-0 dark:[&>div>div>iframe]:!bg-black dark:[&>div>div]:!bg-black"
+            className="dark:[&>div]:!bg-black dark:[&>div]:border-0 dark:[&>div>div>iframe]:border-0"
           />
         </div>
+      </div>
 
+      <div className="flex justify-center">
         <button
           type="submit"
           disabled={isSubmitting || !recaptchaValue}
