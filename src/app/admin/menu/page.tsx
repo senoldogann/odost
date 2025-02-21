@@ -82,33 +82,28 @@ export default function MenuManagement() {
     }
   };
 
-  // Resim yükleme ve menü öğesi ekleme
+  // Resim URL'ini kontrol et
+  const isValidImageUrl = (url: string) => {
+    return url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null;
+  };
+
+  // Yeni ürün ekleme
   const handleAddItem = async () => {
     if (!newItem.name || !newItem.description || !newItem.price || !newItem.category) {
       toast.error('Täytä kaikki pakolliset kentät');
       return;
     }
 
+    if (newItem.image && !isValidImageUrl(newItem.image)) {
+      toast.error('Virheellinen kuvan URL. Sallitut muodot: JPEG, JPG, PNG, WEBP');
+      return;
+    }
+
     try {
-      let imageUrl = '';
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!uploadResponse.ok) throw new Error('Kuvan lataaminen epäonnistui');
-        const { url } = await uploadResponse.json();
-        imageUrl = url;
-      }
-
       const response = await fetch('/api/menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newItem, image: imageUrl })
+        body: JSON.stringify(newItem)
       });
 
       if (!response.ok) throw new Error('Menükohdetta ei voitu lisätä');
@@ -124,7 +119,6 @@ export default function MenuManagement() {
         image: '',
         type: selectedType
       });
-      setSelectedFile(null);
       toast.success('Menükohde lisätty onnistuneesti');
     } catch (error) {
       toast.error('Virhe lisättäessä menükohdetta');
@@ -200,6 +194,11 @@ export default function MenuManagement() {
 
   const handleSaveEdit = async () => {
     if (!editItem) return;
+
+    if (editItem.image && !isValidImageUrl(editItem.image)) {
+      toast.error('Virheellinen kuvan URL. Sallitut muodot: JPEG, JPG, PNG, WEBP');
+      return;
+    }
 
     try {
       const response = await fetch('/api/menu', {
@@ -410,25 +409,23 @@ export default function MenuManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-white">Kuva</label>
-                <div className="space-y-2">
-                  {editItem.image && (
-                    <div className="relative w-full h-40">
-                      <img
-                        src={editItem.image}
-                        alt={editItem.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="w-full text-white"
-                  />
-                  {uploadingImage && <p className="text-sm text-blue-400">Ladataan kuvaa...</p>}
-                </div>
+                <label className="block text-sm font-medium mb-1 text-white">Kuvan URL</label>
+                <input
+                  type="text"
+                  value={editItem.image || ''}
+                  onChange={e => setEditItem({ ...editItem, image: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-3 py-2 bg-white/10 rounded-lg text-white"
+                />
+                {editItem.image && (
+                  <div className="mt-2">
+                    <img
+                      src={editItem.image}
+                      alt="Esikatselu"
+                      className="w-full max-w-[200px] h-auto rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -494,13 +491,23 @@ export default function MenuManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-white">Kuva</label>
+                <label className="block text-sm font-medium mb-1 text-white">Kuvan URL</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
+                  type="text"
+                  value={newItem.image}
+                  onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
                   className="w-full px-3 py-2 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
                 />
+                {newItem.image && (
+                  <div className="mt-2">
+                    <img
+                      src={newItem.image}
+                      alt="Esikatselu"
+                      className="w-full max-w-[200px] h-auto rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-white">Tyyppi</label>
