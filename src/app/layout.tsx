@@ -18,26 +18,48 @@ const poppins = Poppins({
 
 async function getDefaultMetadata() {
   try {
-    const restaurantSettings = await prisma.siteSettings.findFirst({
-      where: { type: 'RAVINTOLA' }
-    });
+    // Her iki site türü için ayarları getir
+    const [restaurantSettings, barSettings] = await Promise.all([
+      prisma.siteSettings.findFirst({
+        where: { type: 'RAVINTOLA' }
+      }),
+      prisma.siteSettings.findFirst({
+        where: { type: 'BAARI' }
+      })
+    ]);
 
-    return {
-      title: restaurantSettings?.title || 'ODOST Ravintola & Baari',
-      description: restaurantSettings?.description || 'Moderni ravintola- ja baarikokemus Helsingissä',
-      keywords: restaurantSettings?.keywords || ['ravintola', 'baari', 'helsinki'],
+    // Varsayılan meta verilerini oluştur
+    const defaultMetadata = {
+      title: 'ODOST Ravintola & Baari',
+      description: 'Moderni ravintola- ja baarikokemus Utajärvissä',
+      keywords: ['ravintola', 'baari', 'Utajärvi'],
+    };
+
+    // Ravintola ve bar meta verilerini birleştir
+    const metadata = {
+      title: restaurantSettings?.title || barSettings?.title || defaultMetadata.title,
+      description: restaurantSettings?.description || barSettings?.description || defaultMetadata.description,
+      keywords: restaurantSettings?.keywords || barSettings?.keywords || defaultMetadata.keywords,
       openGraph: {
-        title: restaurantSettings?.ogTitle || undefined,
-        description: restaurantSettings?.ogDescription || undefined,
-        images: restaurantSettings?.ogImage ? [{ url: restaurantSettings.ogImage }] : [],
+        title: restaurantSettings?.ogTitle || barSettings?.ogTitle || undefined,
+        description: restaurantSettings?.ogDescription || barSettings?.ogDescription || undefined,
+        images: [
+          ...(restaurantSettings?.ogImage ? [{ url: restaurantSettings.ogImage }] : []),
+          ...(barSettings?.ogImage ? [{ url: barSettings.ogImage }] : [])
+        ],
       },
       twitter: {
-        card: restaurantSettings?.twitterCard || 'summary_large_image',
-        title: restaurantSettings?.twitterTitle || undefined,
-        description: restaurantSettings?.twitterDescription || undefined,
-        images: restaurantSettings?.twitterImage ? [restaurantSettings.twitterImage] : [],
+        card: restaurantSettings?.twitterCard || barSettings?.twitterCard || 'summary_large_image',
+        title: restaurantSettings?.twitterTitle || barSettings?.twitterTitle || undefined,
+        description: restaurantSettings?.twitterDescription || barSettings?.twitterDescription || undefined,
+        images: [
+          ...(restaurantSettings?.twitterImage ? [restaurantSettings.twitterImage] : []),
+          ...(barSettings?.twitterImage ? [barSettings.twitterImage] : [])
+        ],
       },
     };
+
+    return metadata;
   } catch (error) {
     console.error('Metadata getirme hatası:', error);
     return {
@@ -57,16 +79,30 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Analitik kodları için ayarları getir
+  // Her iki site türü için analitik ayarlarını getir
   let analyticsSettings;
   try {
-    analyticsSettings = await prisma.siteSettings.findFirst({
-      where: { type: 'RAVINTOLA' },
-      select: {
-        googleAnalyticsId: true,
-        facebookPixelId: true,
-      }
-    });
+    const [restaurantAnalytics, barAnalytics] = await Promise.all([
+      prisma.siteSettings.findFirst({
+        where: { type: 'RAVINTOLA' },
+        select: {
+          googleAnalyticsId: true,
+          facebookPixelId: true,
+        }
+      }),
+      prisma.siteSettings.findFirst({
+        where: { type: 'BAARI' },
+        select: {
+          googleAnalyticsId: true,
+          facebookPixelId: true,
+        }
+      })
+    ]);
+
+    analyticsSettings = {
+      googleAnalyticsId: restaurantAnalytics?.googleAnalyticsId || barAnalytics?.googleAnalyticsId,
+      facebookPixelId: restaurantAnalytics?.facebookPixelId || barAnalytics?.facebookPixelId,
+    };
   } catch (error) {
     console.error('Analitik ayarları getirme hatası:', error);
   }
