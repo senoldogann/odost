@@ -7,6 +7,7 @@ import GallerySection from '@/components/shared/GallerySection';
 import AtmosphereSection from '@/components/shared/AtmosphereSection';
 import Footer from '@/components/Footer';
 import HeaderMenu from '@/components/HeaderMenu';
+import FeatureSection from '@/components/shared/FeatureSection';
 
 // Loading komponenti
 const PageSkeleton = () => null;
@@ -41,7 +42,7 @@ export default function BarPage() {
       <div className="bg-white dark:bg-black">
         <div className="container mx-auto px-4 py-12">
           <div className="flex flex-col items-center mb-12">
-            <h2 className="text-3xl font-bold text-center mb-4">Korostetut juomat</h2>
+            <h2 className="text-3xl font-bold text-center mb-4">Suosikki juomat</h2>
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
               <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>
@@ -51,11 +52,14 @@ export default function BarPage() {
         </div>
       </div>
 
-      {/* Atmosfer Bölümü */}
+      {/* Özel Tanıtım Bölümü */}
+      <FeatureSection type="BAARI" />
+
+      {/* Tunnelma & Erikoisuudet */}
       <section className="py-12 dark:atmosphere-section bg-white dark:bg-transparent">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center mb-12">
-            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Tunnelma & Tapahtumat</h2>
+            <h2 className="text-4xl font-bold text-center mb-4 text-theme">Tunnelma & Erikoisuudet</h2>
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-black/20 dark:via-white/20 to-transparent blur"></div>
               <div className="h-0.5 w-32 bg-gradient-to-r from-transparent via-black dark:via-white to-transparent relative"></div>

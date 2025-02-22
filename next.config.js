@@ -19,7 +19,8 @@ const nextConfig = {
       'localhost',
       'res.cloudinary.com',
       'fonts.googleapis.com',
-      'fonts.gstatic.com'
+      'fonts.gstatic.com',
+      'media.licdn.com'
     ],
   },
   i18n: {
