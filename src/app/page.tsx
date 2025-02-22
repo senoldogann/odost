@@ -34,13 +34,6 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-teal-500 opacity-0 transition-opacity group-hover:opacity-20" />
           </Link>
         </div>
-
-        <div className="mt-16">
-          <Link href="/admin" 
-                className="text-sm text-gray-400 hover:text-white transition-colors">
-            Hallintapaneeli
-          </Link>
-        </div>
       </div>
     </main>
   )
