@@ -82,20 +82,10 @@ export default function MenuManagement() {
     }
   };
 
-  // Resim URL'ini kontrol et
-  const isValidImageUrl = (url: string) => {
-    return url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null;
-  };
-
   // Yeni ürün ekleme
   const handleAddItem = async () => {
     if (!newItem.name || !newItem.description || !newItem.price || !newItem.category) {
       toast.error('Täytä kaikki pakolliset kentät');
-      return;
-    }
-
-    if (newItem.image && !isValidImageUrl(newItem.image)) {
-      toast.error('Virheellinen kuvan URL. Sallitut muodot: JPEG, JPG, PNG, WEBP');
       return;
     }
 
@@ -194,11 +184,6 @@ export default function MenuManagement() {
 
   const handleSaveEdit = async () => {
     if (!editItem) return;
-
-    if (editItem.image && !isValidImageUrl(editItem.image)) {
-      toast.error('Virheellinen kuvan URL. Sallitut muodot: JPEG, JPG, PNG, WEBP');
-      return;
-    }
 
     try {
       const response = await fetch('/api/menu', {
