@@ -133,7 +133,7 @@ export default function SiteSettingsPage() {
         <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-xl space-y-6">
           {/* Yleiset asetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">Perustiedot</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.basicInfo')}</h2>
             
             <div className="flex items-center gap-4">
               <label className="inline-flex items-center">
@@ -143,7 +143,7 @@ export default function SiteSettingsPage() {
                   onChange={(e) => handleChange('isActive', e.target.checked)}
                   className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-600 bg-black/20"
                 />
-                <span className="ml-2 text-white">Sivusto aktiivinen</span>
+                <span className="ml-2 text-white">{t('admin.siteSettings.siteActive')}</span>
               </label>
               
               <label className="inline-flex items-center">
@@ -153,21 +153,21 @@ export default function SiteSettingsPage() {
                   onChange={(e) => handleChange('maintenanceMode', e.target.checked)}
                   className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-600 bg-black/20"
                 />
-                <span className="ml-2 text-white">Huoltotila</span>
+                <span className="ml-2 text-white">{t('admin.siteSettings.maintenanceMode')}</span>
               </label>
             </div>
 
             {settings.maintenanceMode && (
               <div>
                 <label className="block text-sm font-medium text-white mb-1">
-                  Huoltotilan viesti
+                  {t('admin.siteSettings.maintenanceMessage')}
                 </label>
                 <textarea
                   value={settings.maintenanceMessage || ''}
                   onChange={(e) => handleChange('maintenanceMessage', e.target.value)}
                   className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400"
                   rows={3}
-                  placeholder="Sivusto on tilapäisesti huollossa. Palaamme pian!"
+                  placeholder={t('admin.siteSettings.maintenanceInfo')}
                 />
               </div>
             )}
@@ -175,7 +175,7 @@ export default function SiteSettingsPage() {
 
           {/* SEO asetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">SEO ja sosiaalinen media</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.seoAndSocial')}</h2>
             
             <div className="flex justify-end mb-4">
               <button
@@ -218,7 +218,7 @@ export default function SiteSettingsPage() {
                 }}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Luo SEO ehdotus
+                {t('admin.siteSettings.seoSuggestion')}
               </button>
             </div>
             <div>
@@ -263,7 +263,7 @@ export default function SiteSettingsPage() {
 
           {/* Open Graph asetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">Open Graph asetukset</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.ogSettings')}</h2>
             
             <div className="flex justify-end mb-4">
               <button
@@ -310,12 +310,12 @@ export default function SiteSettingsPage() {
                 }}
                 className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
               >
-                Luo OG ehdotus
+                {t('admin.siteSettings.createOgSuggestion')}
               </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                OG Otsikko
+                {t('admin.siteSettings.ogTitle')}
               </label>
               <input
                 type="text"
@@ -327,7 +327,7 @@ export default function SiteSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                OG Kuvaus
+                {t('admin.siteSettings.ogDescription')}
               </label>
               <textarea
                 value={settings.ogDescription || ''}
@@ -339,7 +339,7 @@ export default function SiteSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                OG Kuva URL
+                {t('admin.siteSettings.ogImageUrl')}
               </label>
               <input
                 type="url"
@@ -353,7 +353,7 @@ export default function SiteSettingsPage() {
 
           {/* Twitter Card asetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">Twitter Card asetukset</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.twitterSettings')}</h2>
             
             <div className="flex justify-end mb-4">
               <button
@@ -403,12 +403,12 @@ export default function SiteSettingsPage() {
                 }}
                 className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
               >
-                Luo Twitter ehdotus
+                {t('admin.siteSettings.createTwitterSuggestion')}
               </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Twitter Card tyyppi
+                {t('admin.siteSettings.twitterCardType')}
               </label>
               <select
                 value={settings.twitterCard || 'summary_large_image'}
@@ -422,7 +422,7 @@ export default function SiteSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Twitter Otsikko
+                {t('admin.siteSettings.twitterTitle')}
               </label>
               <input
                 type="text"
@@ -434,7 +434,7 @@ export default function SiteSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Twitter Kuvaus
+                {t('admin.siteSettings.twitterDescription')}
               </label>
               <textarea
                 value={settings.twitterDescription || ''}
@@ -446,7 +446,7 @@ export default function SiteSettingsPage() {
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Twitter Kuva URL
+                {t('admin.siteSettings.twitterImageUrl')}
               </label>
               <input
                 type="url"
@@ -460,7 +460,7 @@ export default function SiteSettingsPage() {
 
           {/* Analytics asetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">Analytics</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.analytics')}</h2>
             
             <div className="flex justify-end mb-4">
               <button
@@ -479,25 +479,25 @@ export default function SiteSettingsPage() {
                 }}
                 className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
-                Luo Analytics ehdotus
+                {t('admin.siteSettings.createAnalyticsSuggestion')}
               </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Google Analytics ID
+                {t('admin.siteSettings.googleAnalyticsId')}
               </label>
               <input
                 type="text"
                 value={settings.googleAnalyticsId || ''}
                 onChange={(e) => handleChange('googleAnalyticsId', e.target.value)}
                 className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400"
-                placeholder="UA-XXXXXXXXX-X tai G-XXXXXXXXXX"
+                placeholder="UA-XXXXXXXXX-X veya G-XXXXXXXXXX"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Facebook Pixel ID
+                {t('admin.siteSettings.facebookPixelId')}
               </label>
               <input
                 type="text"
@@ -510,97 +510,83 @@ export default function SiteSettingsPage() {
 
           {/* Lisäasetukset */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">Lisäasetukset</h2>
+            <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">{t('admin.siteSettings.additionalSettings')}</h2>
             
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end gap-4 mb-4">
               <button
                 type="button"
                 onClick={() => {
-                  const domain = 'https://odost.fi';
-                  const currentDate = new Date().toISOString().split('T')[0];
-                  
-                  const robotsTxt = `# www.robotstxt.org/
-
-User-agent: *
+                  const robotsTxt = `User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Disallow: /private/
+Sitemap: https://www.odost.fi/sitemap.xml`;
+                  handleChange('robotsTxt', robotsTxt);
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                {t('admin.siteSettings.generateRobotsTxt')}
+              </button>
 
-# Allow social media crawlers
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-# Sitemaps
-Sitemap: ${domain}/sitemap.xml
-`;
-
+              <button
+                type="button"
+                onClick={() => {
                   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${domain}/</loc>
-    <lastmod>${currentDate}</lastmod>
+    <loc>https://www.odost.fi/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${domain}/${selectedType.toLowerCase()}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${domain}/menu</loc>
-    <lastmod>${currentDate}</lastmod>
+    <loc>https://www.odost.fi/menu</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${domain}/varaus</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://www.odost.fi/gallery</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${domain}/yhteystiedot</loc>
-    <lastmod>${currentDate}</lastmod>
+    <loc>https://www.odost.fi/contact</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>`;
-
-                  handleChange('robotsTxt', robotsTxt);
                   handleChange('sitemapXml', sitemapXml);
                 }}
-                className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Luo robots.txt ja sitemap.xml ehdotus
+                {t('admin.siteSettings.generateSitemapXml')}
               </button>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                robots.txt sisältö
+                {t('admin.siteSettings.robotsTxt')}
               </label>
               <textarea
                 value={settings.robotsTxt || ''}
                 onChange={(e) => handleChange('robotsTxt', e.target.value)}
-                className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400"
-                rows={5}
+                className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400 font-mono"
+                rows={6}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                sitemap.xml sisältö
+                {t('admin.siteSettings.sitemapXml')}
               </label>
               <textarea
                 value={settings.sitemapXml || ''}
                 onChange={(e) => handleChange('sitemapXml', e.target.value)}
-                className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400"
-                rows={5}
+                className="w-full px-4 py-2 bg-black/20 border border-gray-600 rounded-lg text-white placeholder-gray-400 font-mono"
+                rows={10}
               />
             </div>
           </div>

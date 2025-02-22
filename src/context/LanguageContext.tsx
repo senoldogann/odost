@@ -10,7 +10,7 @@ type Translations = typeof fi;
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
 const translations = {
@@ -35,7 +35,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('adminLanguage', lang);
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, any>): string => {
     const keys = key.split('.');
     let value: any = translations[language];
     
@@ -45,6 +45,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       } else {
         return key;
       }
+    }
+    
+    if (typeof value === 'string' && params) {
+      return value.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        return params[key]?.toString() || match;
+      });
     }
     
     return typeof value === 'string' ? value : key;

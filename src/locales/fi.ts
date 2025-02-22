@@ -111,7 +111,20 @@ export const fi = {
       analytics: 'Analytics',
       createAnalyticsSuggestion: 'Luo Analytics ehdotus',
       googleAnalyticsId: 'Google Analytics ID',
-      facebookPixelId: 'Facebook Pixel ID'
+      facebookPixelId: 'Facebook Pixel ID',
+      generateRobotsTxt: 'Luo Robots.txt',
+      generateSitemapXml: 'Luo Sitemap.xml',
+      generateContent: 'Luo sisältö',
+      generateMetaTags: 'Luo meta-tagit',
+      saveChanges: 'Tallenna muutokset',
+      generalSettings: 'Yleiset asetukset',
+      seoSettings: 'SEO-asetukset',
+      socialMediaSettings: 'Sosiaalisen median asetukset',
+      createSeoSuggestion: 'Luo SEO-ehdotus',
+      metaDescription: 'Meta-kuvaus',
+      metaKeywords: 'Meta-avainsanat',
+      robotsContent: 'Robots.txt sisältö',
+      sitemapContent: 'Sitemap.xml sisältö'
     },
     reservations: {
       title: 'Varaukset',

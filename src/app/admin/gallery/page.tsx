@@ -49,12 +49,12 @@ export default function GalleryManagement() {
   const fetchGalleryItems = async () => {
     try {
       const response = await fetch(`/api/gallery?type=${selectedType}`);
-      if (!response.ok) throw new Error('Gallerian hakeminen epäonnistui');
+      if (!response.ok) throw new Error(t('admin.gallery.fetchError'));
       const data = await response.json();
       setItems(data);
     } catch (error) {
-      console.error('Gallerian hakuvirhe:', error);
-      toast.error('Gallerian hakeminen epäonnistui');
+      console.error(t('admin.gallery.fetchErrorToast'), error);
+      toast.error(t('admin.gallery.fetchError'));
     } finally {
       setIsLoading(false);
     }
@@ -62,37 +62,29 @@ export default function GalleryManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!newItem.title || !newItem.imageUrl) {
+      toast.error(t('admin.common.error'));
+      return;
+    }
 
-    if (!newItem.imageUrl) {
-      toast.error('Kuvan URL vaaditaan');
+    if (!isValidImageUrl(newItem.imageUrl)) {
+      toast.error(t('admin.gallery.invalidImageUrl'));
       return;
     }
 
     try {
-      const url = '/api/gallery';
-      const method = editingId ? 'PUT' : 'POST';
-      const itemData = editingId ? { ...newItem, id: editingId } : newItem;
-
-      const response = await fetch(url, {
-        method,
+      const response = await fetch('/api/gallery', {
+        method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(itemData),
+        body: JSON.stringify(editingId ? { ...newItem, id: editingId } : newItem),
       });
 
-      if (!response.ok) throw new Error(editingId ? 'Päivitys epäonnistui' : 'Lisäys epäonnistui');
-
-      const updatedItem = await response.json();
-
-      // State'i güncelle
-      if (editingId) {
-        setItems(prevItems => prevItems.map(item => 
-          item.id === editingId ? updatedItem : item
-        ));
-      } else {
-        setItems(prevItems => [...prevItems, updatedItem]);
+      if (!response.ok) {
+        throw new Error(editingId ? t('admin.gallery.updateError') : t('admin.gallery.addError'));
       }
 
-      toast.success(editingId ? 'Kuva päivitetty onnistuneesti' : 'Kuva lisätty onnistuneesti');
+      toast.success(editingId ? t('admin.gallery.updateSuccess') : t('admin.gallery.addSuccess'));
       setNewItem({
         title: '',
         description: '',
@@ -101,28 +93,28 @@ export default function GalleryManagement() {
         isActive: true
       });
       setEditingId(null);
+      fetchGalleryItems();
     } catch (error) {
-      console.error('Virhe:', error);
-      toast.error(editingId ? 'Päivitys epäonnistui' : 'Lisäys epäonnistui');
+      console.error(error);
+      toast.error(editingId ? t('admin.gallery.updateError') : t('admin.gallery.addError'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Haluatko varmasti poistaa tämän kuvan?')) return;
+    if (!window.confirm(t('admin.gallery.confirmDelete'))) return;
 
     try {
-      const response = await fetch(`/api/gallery?id=${id}`, {
+      const response = await fetch(`/api/gallery/${id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Poisto epäonnistui');
+      if (!response.ok) throw new Error(t('admin.gallery.deleteError'));
 
-      // State'den silinen öğeyi kaldır
-      setItems(prevItems => prevItems.filter(item => item.id !== id));
-      toast.success('Kuva poistettu onnistuneesti');
+      toast.success(t('admin.gallery.deleteSuccess'));
+      fetchGalleryItems();
     } catch (error) {
-      console.error('Poistovirhe:', error);
-      toast.error('Poisto epäonnistui');
+      console.error(error);
+      toast.error(t('admin.gallery.deleteError'));
     }
   };
 
@@ -143,12 +135,12 @@ export default function GalleryManagement() {
   };
 
   if (isLoading) {
-    return <div className="p-4 text-white">Ladataan...</div>;
+    return <div className="p-4 text-white">{t('admin.gallery.loading')}</div>;
   }
 
   return (
     <div className="p-4 text-white">
-      <h1 className="text-2xl font-bold mb-6">Galleria</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('admin.gallery.title')}</h1>
 
       <div className="mb-6">
         <select
@@ -156,76 +148,69 @@ export default function GalleryManagement() {
           onChange={(e) => setSelectedType(e.target.value as 'RAVINTOLA' | 'BAARI')}
           className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
         >
-          <option value="RAVINTOLA" className="bg-black text-white">Ravintola</option>
-          <option value="BAARI" className="bg-black text-white">Baari</option>
+          <option value="RAVINTOLA" className="bg-black text-white">{t('admin.gallery.restaurant')}</option>
+          <option value="BAARI" className="bg-black text-white">{t('admin.gallery.bar')}</option>
         </select>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-8 border border-white/10 p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4 text-white">
-          {editingId ? 'Muokkaa kuvaa' : 'Lisää uusi kuva'}
+      <form onSubmit={handleSubmit} className="mb-8 bg-white/5 p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">
+          {editingId ? t('admin.gallery.editImage') : t('admin.gallery.addNewImage')}
         </h2>
+        
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1 text-white">Otsikko</label>
+            <label className="block text-sm font-medium mb-1">{t('admin.gallery.imageTitle')}</label>
             <input
               type="text"
               name="title"
               value={newItem.title}
               onChange={handleChange}
+              className="w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
               required
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-white">Kuvaus</label>
+            <label className="block text-sm font-medium mb-1">{t('admin.gallery.description')}</label>
             <textarea
               name="description"
               value={newItem.description}
               onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
+              className="w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+              rows={3}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-white">Kuvan URL</label>
+            <label className="block text-sm font-medium mb-1">{t('admin.gallery.imageUrl')}</label>
             <input
               type="text"
               name="imageUrl"
               value={newItem.imageUrl}
               onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
+              className="w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20"
+              required
             />
-            <p className="mt-1 text-sm text-gray-400">
-              Syötä kuvan URL-osoite (tuetut muodot: JPEG, JPG, PNG, WEBP)
-            </p>
           </div>
 
-          {newItem.imageUrl && (
-            <div className="mt-2 relative h-40 w-40">
-              <Image
-                src={newItem.imageUrl}
-                alt="Esikatselu"
-                fill
-                sizes="160px"
-                className="object-cover rounded-lg"
-                onError={() => {
-                  setNewItem(prev => ({ ...prev, imageUrl: '' }));
-                  toast.error('Virheellinen kuvan URL');
-                }}
-              />
-            </div>
-          )}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              name="isActive"
+              checked={newItem.isActive}
+              onChange={(e) => setNewItem(prev => ({ ...prev, isActive: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label className="ml-2 text-sm">{t('admin.gallery.active')}</label>
+          </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <button
               type="submit"
-              className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {editingId ? 'Päivitä' : 'Lisää'}
+              {editingId ? t('admin.common.save') : t('admin.common.add')}
             </button>
             {editingId && (
               <button
@@ -240,54 +225,60 @@ export default function GalleryManagement() {
                     isActive: true
                   });
                 }}
-                className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
-                Peruuta
+                {t('admin.common.cancel')}
               </button>
             )}
           </div>
         </div>
       </form>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
-          <div key={item.id} className="bg-black border border-white/10 rounded-lg overflow-hidden">
-            <div className="relative h-48 w-full">
-              <Image
-                src={item.imageUrl || '/images/default-gallery.jpg'}
-                alt={item.title || 'Galleriakuva'}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/images/default-gallery.jpg';
-                }}
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
-              {item.description && (
-                <p className="text-gray-300 mb-4">{item.description}</p>
-              )}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="px-4 py-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors"
-                >
-                  Muokkaa
-                </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="px-4 py-2 bg-red-500/50 text-white rounded-full hover:bg-red-500/70 transition-colors"
-                >
-                  Poista
-                </button>
+      <h2 className="text-xl font-semibold mb-4">{t('admin.gallery.currentImages')}</h2>
+
+      {items.length === 0 ? (
+        <p className="text-gray-400">{t('admin.gallery.noImages')}</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((item) => (
+            <div key={item.id} className="bg-black border border-white/10 rounded-lg overflow-hidden">
+              <div className="relative h-48 w-full">
+                <Image
+                  src={item.imageUrl || '/images/default-gallery.jpg'}
+                  alt={item.title || t('admin.gallery.imagePreview')}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/default-gallery.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
+                {item.description && (
+                  <p className="text-gray-300 mb-4">{item.description}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="px-4 py-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors"
+                  >
+                    {t('admin.gallery.edit')}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="px-4 py-2 bg-red-500/50 text-white rounded-full hover:bg-red-500/70 transition-colors"
+                  >
+                    {t('admin.gallery.delete')}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 } 
