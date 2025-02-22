@@ -2,12 +2,9 @@
 
 import HeaderMenu from '@/components/HeaderMenu';
 import Footer from '@/components/Footer';
-import { useCompany } from '@/context/CompanyContext';
 import Image from 'next/image';
 
 export default function SaavutettavuusPage() {
-  const company = useCompany();
-
   return (
     <div className="min-h-screen bg-theme">
       <HeaderMenu type="RAVINTOLA" />
@@ -38,7 +35,7 @@ export default function SaavutettavuusPage() {
               <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">Johdanto</h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <p className="menu-description">
-                  {company.name} on sitoutunut digitaalisten palveluiden saavutettavuuteen 
+                {process.env.NEXT_PUBLIC_COMPANY_NAME} on sitoutunut digitaalisten palveluiden saavutettavuuteen 
                   ja pyrkii varmistamaan verkkosivustonsa saavutettavuuden EU:n saavutettavuusdirektiivin 
                   ja kansallisen lainsäädännön mukaisesti.
                 </p>
@@ -92,17 +89,17 @@ export default function SaavutettavuusPage() {
                   Jos et pysty käyttämään verkkosivustoamme, voit asioida kanssamme seuraavilla tavoilla:
                 </p>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📞</span>
-                    <span>Puhelimitse: {company.phone}</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📞</span>
+                    <span>Puhelimitse: {process.env.NEXT_PUBLIC_COMPANY_PHONE}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📧</span>
-                    <span>Sähköpostitse: {company.email}</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📧</span>
+                    <span>Sähköpostitse: {process.env.NEXT_PUBLIC_COMPANY_EMAIL}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">🏢</span>
-                    <span>Käymällä ravintolassamme: {company.address}</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">🏢</span>
+                    <span>Käymällä ravintolassamme: {process.env.NEXT_PUBLIC_COMPANY_ADDRESS}</span>
                   </div>
                 </div>
               </div>
@@ -112,17 +109,16 @@ export default function SaavutettavuusPage() {
               <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">Palaute ja yhteydenotot</h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <p className="menu-description mb-6">
-                  Jos huomaat sivustollamme saavutettavuusongelman tai haluat antaa palautetta 
-                  saavutettavuudesta, voit ottaa yhteyttä:
+                  Jos huomaat sivustollamme saavutettavuusongelman tai haluat antaa palautetta saavutettavuudesta, voit ottaa yhteyttä:
                 </p>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📧</span>
-                    <span>Sähköposti: {company.privacyEmail}</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📧</span>
+                    <span>Sähköposti: {process.env.NEXT_PUBLIC_PRIVACY_EMAIL}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📞</span>
-                    <span>Puhelin: {company.privacyPhone}</span>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📞</span>
+                    <span>Puhelin: {process.env.NEXT_PUBLIC_PRIVACY_PHONE}</span>
                   </div>
                 </div>
               </div>

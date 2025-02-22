@@ -2,12 +2,9 @@
 
 import HeaderMenu from '@/components/HeaderMenu';
 import Footer from '@/components/Footer';
-import { useCompany } from '@/context/CompanyContext';
 import Image from 'next/image';
 
 export default function TietosuojaPage() {
-  const company = useCompany();
-
   return (
     <div className="min-h-screen bg-theme">
       <HeaderMenu type="RAVINTOLA" />
@@ -38,11 +35,11 @@ export default function TietosuojaPage() {
               <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">1. Rekisterinpitäjä</h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <p className="menu-description">
-                  <strong className="block text-xl mb-4">{company.name}</strong>
-                  <span className="block mb-2">Y-tunnus: {company.yTunnus}</span>
-                  <span className="block mb-2">Osoite: {company.address}</span>
-                  <span className="block mb-2">Sähköposti: {company.email}</span>
-                  <span className="block">Puhelin: {company.phone}</span>
+                  <strong className="block text-xl mb-4">{process.env.NEXT_PUBLIC_COMPANY_NAME}</strong>
+                  <span className="block mb-2">Y-tunnus: {process.env.NEXT_PUBLIC_COMPANY_Y_TUNNUS}</span>
+                  <span className="block mb-2">Osoite: {process.env.NEXT_PUBLIC_COMPANY_ADDRESS}</span>
+                  <span className="block mb-2">Sähköposti: {process.env.NEXT_PUBLIC_COMPANY_EMAIL}</span>
+                  <span className="block">Puhelin: {process.env.NEXT_PUBLIC_COMPANY_PHONE}</span>
                 </p>
               </div>
             </section>
@@ -162,11 +159,11 @@ export default function TietosuojaPage() {
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center">
                     <span className="mr-3">📧</span>
-                    <span>Sähköposti: {company.privacyEmail}</span>
+                    <span>Sähköposti: {process.env.NEXT_PUBLIC_PRIVACY_EMAIL}</span>
                   </div>
                   <div className="flex items-center">
                     <span className="mr-3">📞</span>
-                    <span>Puhelin: {company.privacyPhone}</span>
+                    <span>Puhelin: {process.env.NEXT_PUBLIC_PRIVACY_PHONE}</span>
                   </div>
                 </div>
               </div>

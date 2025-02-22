@@ -2,12 +2,9 @@
 
 import HeaderMenu from '@/components/HeaderMenu';
 import Footer from '@/components/Footer';
-import { useCompany } from '@/context/CompanyContext';
 import Image from 'next/image';
 
 export default function KayttoehdotPage() {
-  const company = useCompany();
-
   return (
     <div className="min-h-screen bg-theme">
       <HeaderMenu type="RAVINTOLA" />
@@ -38,7 +35,7 @@ export default function KayttoehdotPage() {
               <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">1. Yleistä</h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <p className="menu-description">
-                  Nämä käyttöehdot koskevat {company.name}in verkkosivuston käyttöä. 
+                  Nämä käyttöehdot koskevat {process.env.NEXT_PUBLIC_COMPANY_NAME}in verkkosivuston käyttöä. 
                   Käyttämällä sivustoamme hyväksyt nämä käyttöehdot ja sitoudut noudattamaan niitä.
                 </p>
               </div>
@@ -101,28 +98,24 @@ export default function KayttoehdotPage() {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">4. Yhteystiedot</h2>
+              <h2 className="text-3xl font-semibold mb-6 text-theme border-b pb-4">Yhteystiedot</h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📍</span>
-                      <span>{company.address}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📞</span>
-                      <span>{company.phone}</span>
-                    </div>
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📍</span>
+                    <span>{process.env.NEXT_PUBLIC_COMPANY_ADDRESS}</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📧</span>
-                      <span>{company.email}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">🏢</span>
-                      <span>Y-tunnus: {company.yTunnus}</span>
-                    </div>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📞</span>
+                    <span>{process.env.NEXT_PUBLIC_COMPANY_PHONE}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">📧</span>
+                    <span>{process.env.NEXT_PUBLIC_COMPANY_EMAIL}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-4">🏢</span>
+                    <span>Y-tunnus: {process.env.NEXT_PUBLIC_COMPANY_Y_TUNNUS}</span>
                   </div>
                 </div>
               </div>
