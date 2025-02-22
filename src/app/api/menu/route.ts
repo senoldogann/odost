@@ -39,50 +39,79 @@ export async function GET(request: Request) {
 // POST - Yeni menü öğesi ekle
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json()
-    console.log('Yeni menü öğesi ekleniyor:', data)
+    const body = await request.json();
     
-    const newItem = await prisma.menuItem.create({
-      data
-    })
-    
-    console.log('Yeni menü öğesi eklendi:', newItem)
-    return NextResponse.json(newItem)
+    // Eğer body bir array ise, toplu ekleme yapılıyor demektir
+    if (Array.isArray(body)) {
+      const menuItems = await prisma.menuItem.createMany({
+        data: body.map(item => ({
+          name: item.name,
+          description: item.description,
+          price: parseFloat(item.price),
+          familyPrice: item.familyPrice ? parseFloat(item.familyPrice) : null,
+          category: item.category,
+          image: item.image,
+          type: item.type,
+          isActive: item.isActive,
+          isFeatured: item.isFeatured || false,
+          allergens: item.allergens || [],
+          order: item.order || 0
+        }))
+      });
+      return NextResponse.json(menuItems);
+    }
+
+    // Tek öğe ekleme
+    const { name, description, price, familyPrice, category, image, type, isActive, isFeatured, allergens, order } = body;
+    const menuItem = await prisma.menuItem.create({
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        familyPrice: familyPrice ? parseFloat(familyPrice) : null,
+        category,
+        image,
+        type,
+        isActive,
+        isFeatured,
+        allergens,
+        order
+      }
+    });
+    return NextResponse.json(menuItem);
   } catch (error) {
-    console.error('Menu item oluşturma hatası:', error)
-    return NextResponse.json({ 
-      error: 'Menu item oluşturulamadı',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    console.error('Menü öğesi oluşturulurken hata:', error);
+    return NextResponse.json({ error: 'Menü öğesi oluşturulamadı' }, { status: 500 });
   }
 }
 
 // PUT - Menü öğesini güncelle
 export async function PUT(request: NextRequest) {
   try {
-    const data = await request.json()
-    console.log('Güncellenecek veri:', data)
+    const body = await request.json();
+    const { id, name, description, price, familyPrice, category, image, type, isActive, isFeatured, allergens, order } = body;
 
-    if (!data.id) {
-      console.error('ID eksik')
-      return NextResponse.json({ error: 'ID gerekli' }, { status: 400 })
-    }
-
-    const { id, ...updateData } = data
-    
-    const updatedItem = await prisma.menuItem.update({
+    const menuItem = await prisma.menuItem.update({
       where: { id },
-      data: updateData
-    })
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        familyPrice: familyPrice ? parseFloat(familyPrice) : null,
+        category,
+        image,
+        type,
+        isActive,
+        isFeatured,
+        allergens,
+        order
+      }
+    });
 
-    console.log('Öğe güncellendi:', updatedItem)
-    return NextResponse.json(updatedItem)
+    return NextResponse.json(menuItem);
   } catch (error) {
-    console.error('Menu item güncelleme hatası:', error)
-    return NextResponse.json({ 
-      error: 'Menu item güncellenemedi',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    console.error('Menü öğesi güncellenirken hata:', error);
+    return NextResponse.json({ error: 'Menü öğesi güncellenemedi' }, { status: 500 });
   }
 }
 

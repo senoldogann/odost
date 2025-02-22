@@ -35,6 +35,7 @@ model MenuItem {
   name        String
   description String
   price       Float     // Hinta euroina
+  familyPrice Float?    // Perhe hinta euroina (opsiyonel)
   category    String
   image       String?
   allergens   String[]

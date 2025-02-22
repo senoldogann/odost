@@ -11,6 +11,7 @@ interface MenuItem {
   name: string
   description: string
   price: number
+  familyPrice?: number
   type: MenuType
   isActive: boolean
   isFeatured: boolean
@@ -104,20 +105,27 @@ export default function MenuSection() {
                   </div>
                 )}
 
-                <div className="flex justify-between items-center">
-                  <span className="text-xl lg:text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    {item.price} €
-                  </span>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCall();
-                    }}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 dark:from-amber-500 dark:to-amber-600 text-white rounded-xl shadow-lg hover:shadow-amber-500/20 dark:hover:shadow-amber-400/20 transform hover:translate-x-1 transition-all duration-300 text-sm flex items-center gap-2"
-                  >
-                    <FaPhone className="w-3 h-3" />
-                    Tilaa
-                  </button>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl lg:text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {item.price} €
+                    </span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCall();
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 dark:from-amber-500 dark:to-amber-600 text-white rounded-xl shadow-lg hover:shadow-amber-500/20 dark:hover:shadow-amber-400/20 transform hover:translate-x-1 transition-all duration-300 text-sm flex items-center gap-2"
+                    >
+                      <FaPhone className="w-3 h-3" />
+                      Tilaa
+                    </button>
+                  </div>
+                  {item.type === 'RAVINTOLA' && item.familyPrice && (
+                    <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                      Perhe: {item.familyPrice} €
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

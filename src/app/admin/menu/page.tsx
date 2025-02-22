@@ -20,9 +20,14 @@ export default function MenuManagement() {
     name: '',
     description: '',
     price: 0,
+    familyPrice: null as number | null,
     category: '',
     image: '',
-    type: selectedType as 'RAVINTOLA' | 'BAARI'
+    type: selectedType as 'RAVINTOLA' | 'BAARI',
+    isActive: true,
+    isFeatured: false,
+    allergens: [] as string[],
+    order: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
@@ -105,9 +110,14 @@ export default function MenuManagement() {
         name: '',
         description: '',
         price: 0,
+        familyPrice: null,
         category: '',
         image: '',
-        type: selectedType
+        type: selectedType,
+        isActive: true,
+        isFeatured: false,
+        allergens: [],
+        order: 0
       });
       toast.success('Menükohde lisätty onnistuneesti');
     } catch (error) {
@@ -241,6 +251,9 @@ export default function MenuManagement() {
                 <th className="px-2 py-2 text-left hidden md:table-cell">{t('admin.menu.description')}</th>
                 <th className="px-2 py-2 text-left hidden sm:table-cell">{t('admin.menu.category')}</th>
                 <th className="px-2 py-2 text-right">{t('admin.menu.price')}</th>
+                {selectedType === 'RAVINTOLA' && (
+                  <th className="px-2 py-2 text-right">{t('admin.menu.familyPrice')}</th>
+                )}
                 <th className="px-2 py-2 text-center">
                   <span className="hidden sm:inline">{t('admin.menu.active')}</span>
                   <span className="sm:hidden">Akt.</span>
@@ -275,7 +288,10 @@ export default function MenuManagement() {
                   <td className="px-2 py-2 hidden sm:table-cell">
                     <div className="max-w-[100px] truncate">{item.category}</div>
                   </td>
-                  <td className="px-2 py-2 text-right">{item.price}</td>
+                  <td className="px-2 py-2 text-right">{item.price.toFixed(2)} €</td>
+                  {selectedType === 'RAVINTOLA' && (
+                    <td className="px-2 py-2 text-right">{item.familyPrice ? `${item.familyPrice.toFixed(2)} €` : '-'}</td>
+                  )}
                   <td className="px-2 py-2 text-center">
                     <button
                       onClick={() => handleToggleActive(item.id)}
@@ -371,6 +387,20 @@ export default function MenuManagement() {
                 />
               </div>
 
+              {editItem.type === 'RAVINTOLA' && (
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-white">Perhehinnat (€)</label>
+                  <input
+                    type="number"
+                    value={editItem.familyPrice || ''}
+                    onChange={e => setEditItem({ ...editItem, familyPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                    className="w-full px-3 py-2 bg-white/10 rounded-lg text-white"
+                    step="0.01"
+                    placeholder="Valinnainen"
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium mb-1 text-white">{t('admin.menu.category')}</label>
                 <input
@@ -456,16 +486,29 @@ export default function MenuManagement() {
                   className="w-full px-3 py-2 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-white">Hinta (€)</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1 text-white">{t('admin.menu.price')} (€)</label>
                 <input
                   type="number"
-                  step="0.01"
                   value={newItem.price}
-                  onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) })}
+                  onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
                   className="w-full px-3 py-2 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
+                  required
                 />
               </div>
+              {selectedType === 'RAVINTOLA' && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1 text-white">
+                    {t('admin.menu.familyPrice')} (€) <span className="text-gray-400">({t('admin.menu.optional')})</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={newItem.familyPrice || ''}
+                    onChange={(e) => setNewItem({ ...newItem, familyPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                    className="w-full px-3 py-2 bg-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/20 text-white"
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium mb-1 text-white">Kategoria</label>
                 <input

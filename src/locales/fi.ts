@@ -43,6 +43,8 @@ export const fi = {
       name: 'Nimi',
       description: 'Kuvaus',
       price: 'Hinta',
+      familyPrice: 'Perhehinta',
+      optional: '(valinnainen)',
       category: 'Kategoria',
       image: 'Kuva',
       type: 'Tyyppi',

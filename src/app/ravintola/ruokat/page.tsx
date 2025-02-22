@@ -17,6 +17,7 @@ interface MenuItem {
   isActive: boolean;
   allergens?: string[];
   image?: string;
+  familyPrice?: number;
 }
 
 export default function MenuPage() {
@@ -68,7 +69,7 @@ export default function MenuPage() {
   };
 
   const handleCall = () => {
-    window.location.href = `tel:${process.env.NEXT_PUBLIC_PHONE}`;
+    window.location.href = `tel:${process.env.NEXT_PUBLIC_COMPANY_PHONE}`;
   };
 
   // Filtreleme fonksiyonu
@@ -107,7 +108,7 @@ export default function MenuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 max-w-7xl mx-auto">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 p-3">
-                <div className="flex justify-between items-start gap-2 mb-2">
+                <div className="flex justify-between items-start gap-2">
                   <div className="h-5 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
                   <div className="h-5 w-16 bg-gray-200 dark:bg-gray-800 rounded"></div>
                 </div>
@@ -198,51 +199,66 @@ export default function MenuPage() {
         {/* Menü Öğeleri Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 max-w-7xl mx-auto">
           {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className="group bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 transition-all duration-300"
-            >
-              <div className="p-3">
-                <div className="flex justify-between items-start gap-2 mb-2">
-                  <h3 className="text-base font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300">
+            <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
+              {/* Resim Alanı */}
+              <div className="relative h-48 w-full">
+                <Image
+                  src={item.image || '/images/placeholder.jpg'}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  {item.price} €
+                  {item.familyPrice && (
+                    <span className="ml-2 text-xs">Perhe: {item.familyPrice} €</span>
+                  )}
+                </div>
+              </div>
+
+              {/* İçerik Alanı */}
+              <div className="p-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     {item.name}
                   </h3>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handleCall}
-                      className="p-1.5 rounded-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 text-amber-600 dark:text-amber-400 transition-all duration-300 hover:scale-110"
-                    >
-                      <FaPhone className="w-3 h-3" />
-                    </button>
-                    <div className="bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
-                      <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                        {item.price}€
-                      </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCall();
+                    }}
+                    className="p-2 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors"
+                    aria-label="Tilaa puhelimitse"
+                  >
+                    <FaPhone className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* İçindekiler Listesi */}
+                <div className="space-y-2 mb-4">
+                  {item.description.split(',').map((ingredient, index) => (
+                    <div key={index} className="flex items-center text-gray-600 dark:text-gray-300">
+                      <span className="text-amber-500 mr-2">•</span>
+                      <span className="text-sm">{ingredient.trim()}</span>
                     </div>
-                  </div>
+                  ))}
                 </div>
 
-                <div className="mb-2">
-                  <div className="flex flex-wrap gap-1 text-gray-600 dark:text-gray-400 text-xs">
-                    {formatDescription(item.description).map((desc, index) => (
-                      <span key={index} className="inline-flex items-center">
-                        {index > 0 && <span className="mx-0.5 text-amber-400/70">•</span>}
-                        {desc}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
+                {/* Alerjenler */}
                 {item.allergens && item.allergens.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {item.allergens.map((allergen, index) => (
-                      <span
-                        key={index}
-                        className="px-1 py-0.5 text-[10px] bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full border border-amber-200/50 dark:border-amber-800/50"
-                      >
-                        {allergen}
-                      </span>
-                    ))}
+                  <div className="mt-3">
+                    <div className="flex flex-wrap gap-2">
+                      {item.allergens.map((allergen, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs"
+                        >
+                          {allergen}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -259,6 +275,100 @@ export default function MenuPage() {
           </div>
         )}
       </main>
+
+      {/* Lisätäytteet ve Omavalinta Bölümü */}
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-900/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto space-y-12">
+            {/* Lisätäytteet */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-800">
+              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Lisätäytteet</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {['Pizza suikale', 'Tonnikala', 'Ananas', 'Salami', 'Kebab', 'Pepperonimakkara', 'Pekoni', 'Jalapeno', 'Savuporo', 'Aurajuusto', 'Jauhelia', 'Herkkusieni', 'Paprika', 'Sipuli', 'Kirsikkatomaatti', 'Rucola', 'Mozzarella', 'Salaattijuusto', 'Katkarapu', 'Persikka', 'Kana', 'Vuohenjuusto', 'Cheddarjuusto'].map((item) => (
+                  <div key={item} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center">
+                    <span className="text-gray-700 dark:text-gray-300">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Lisätiedot */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-800">
+              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Lisätiedot</h2>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+                      <span className="text-2xl">🍽️</span>
+                    </div>
+                  </div>
+                  <p className="text-lg text-gray-700 dark:text-gray-200">
+                    Kaikki pihville kuulu ranskalaiset, lohkoperunat tai riisi
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+                      <span className="text-2xl">🍔</span>
+                    </div>
+                  </div>
+                  <p className="text-lg text-gray-700 dark:text-gray-200">
+                    Kaikki burgerit sisältä kuulu ranskalaiset ja 0.33 Limsa
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Omavalinta */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-800">
+              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Omavalinta</h2>
+              <div className="grid gap-4">
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-6">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-800 dark:text-gray-200">1 TÄYTETTÄ</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">10.00 €</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-800 dark:text-gray-200">2 TÄYTETTÄ</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">11.00 €</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-800 dark:text-gray-200">3 TÄYTETTÄ</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">12.00 €</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-800 dark:text-gray-200">4 TÄYTETTÄ</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">13.00 €</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-800 dark:text-gray-200">TUPLA JUUSTO</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">2.00 €</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-800 dark:text-gray-200">TUPLA KEBAB</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">2.00 €</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-800 dark:text-gray-200">GLUTEENITON</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">3.00 €</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>
