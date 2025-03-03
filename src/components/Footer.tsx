@@ -220,6 +220,11 @@ export default function Footer() {
               <Link href="/saavutettavuus" className="hover:text-theme transition-colors">Saavutettavuus</Link>
             </div>
           </div>
+          <div className="text-center mt-4 text-sm menu-description">
+            <a href="https://www.senoldogan.dev/" target="_blank" rel="noopener noreferrer" className="hover:text-theme transition-colors">
+              By Senol Dogan
+            </a>
+          </div>
         </div>
       </div>
     </footer>
